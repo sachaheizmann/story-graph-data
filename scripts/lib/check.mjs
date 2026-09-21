@@ -41,7 +41,7 @@ export function checkDataset(dataDir) {
     if (formatted !== null && formatted !== entry.raw) {
       const detail = entry.kind === 'noteText'
         ? 'fin de ligne LF, un seul retour à la ligne final'
-        : 'indentation de 2 espaces, clés dans l\'ordre du schéma, fin de ligne LF, retour à la ligne final, liens triés par id';
+        : `indentation de 2 espaces, clés dans l'ordre du schéma, fin de ligne LF, retour à la ligne final${entry.kind === 'relations' ? ', liens triés par id' : ''}`;
       add(entry.file, 'format.not-canonical', `Ce fichier n'est pas au format canonique (${detail}).`,
         { fix: 'Lancez « npm run format » : il le corrige tout seul.' });
     }

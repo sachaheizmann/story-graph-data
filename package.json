@@ -11,7 +11,11 @@
   "scripts": {
     "test": "node --test",
     "check": "node scripts/check.mjs",
-    "format": "node scripts/format.mjs"
+    "format": "node scripts/format.mjs",
+    "coverage": "node scripts/coverage.mjs",
+    "new-character": "node scripts/new-character.mjs",
+    "new-note": "node scripts/new-note.mjs",
+    "new-edition": "node scripts/new-edition.mjs"
   },
   "dependencies": {
     "ajv": "^8.20.0"
