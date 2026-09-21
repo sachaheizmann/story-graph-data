@@ -168,7 +168,7 @@ export function loadDataset(dataDir, ajv) {
       entry.valid = true;
     } else {
       try {
-        entry.data = JSON.parse(raw);
+        entry.data = JSON.parse(raw.replace(/^\uFEFF/, '')); // tolère le BOM (la règle de format le signalera)
       } catch (error) {
         add(file, 'json.parse', `Ce fichier n'est pas du JSON valide (${error.message}).`,
           { fix: 'Cherchez une virgule oubliée ou en trop, un guillemet ou une accolade manquants. Un éditeur comme VS Code souligne l\'erreur.' });

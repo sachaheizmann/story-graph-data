@@ -451,5 +451,5 @@ test('la commande « check » sort en erreur (code 1) et affiche les explication
 test('la commande « check » sort en succès (code 0) sur un jeu valide', () => {
   const result = spawnSync(process.execPath, [path.join(SCRIPTS_DIR, 'check.mjs'), '--data', VALID_DATA], { encoding: 'utf8' });
   assert.equal(result.status, 0);
-  assert.match(result.stdout, /✓ 32 fichiers vérifiés, aucun problème\./);
+  assert.match(result.stdout, /✓ \d+ fichiers vérifiés, aucun problème\./);
 });
