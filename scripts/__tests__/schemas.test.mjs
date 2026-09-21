@@ -86,6 +86,13 @@ for (const [name, { ok, ko }] of Object.entries(samples)) {
   });
 }
 
+test('relation : le type peut contenir un underscore (parent_of) mais pas de majuscule', () => {
+  const validate = getValidator(ajv, 'relation');
+  const base = { id: 'a-b-parent-1', from: 'a', to: 'b', start };
+  assert.equal(validate({ ...base, type: 'parent_of' }), true, JSON.stringify(validate.errors));
+  assert.equal(validate({ ...base, type: 'Parent_Of' }), false);
+});
+
 test('position « end » accepte null mais refuse une chaîne', () => {
   const validate = getValidator(ajv, 'character');
   assert.equal(validate({ id: 'a', start, end: null }), true);

@@ -4,7 +4,7 @@
   "title": "Libellés des types de liens (data/_common/text/<langue>/relation-types.json)",
   "type": "object",
   "minProperties": 1,
-  "propertyNames": { "pattern": "^[a-z]+(_[a-z]+)*$" },
+  "propertyNames": { "$ref": "common.schema.json#/$defs/relationType" },
   "additionalProperties": {
     "type": "object",
     "required": ["label"],

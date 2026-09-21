@@ -1,0 +1,11 @@
+{
+  "id": "n-3hfv7",
+  "about": {
+    "type": "relation",
+    "id": "aria-kael-sibling-1"
+  },
+  "start": {
+    "book": "tome-1",
+    "chapter": 16
+  }
+}

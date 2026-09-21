@@ -1,0 +1,29 @@
+{
+  "ally": {
+    "label": "is allied with"
+  },
+  "enemy": {
+    "label": "is the enemy of"
+  },
+  "friend": {
+    "label": "is a friend of"
+  },
+  "mentor_of": {
+    "label": "is the mentor of"
+  },
+  "parent_of": {
+    "label": "is the parent of"
+  },
+  "rival": {
+    "label": "is a rival of"
+  },
+  "servant_of": {
+    "label": "is the master of"
+  },
+  "sibling_of": {
+    "label": "is a sibling of"
+  },
+  "spouse_of": {
+    "label": "is married to"
+  }
+}

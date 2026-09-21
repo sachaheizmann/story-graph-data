@@ -1,0 +1,22 @@
+{
+  "id": "fr-original",
+  "language": "fr",
+  "publisher": "Éditions de la Brume",
+  "year": 2012,
+  "based_on": null,
+  "created_by": [
+    "demo-maintainer"
+  ],
+  "books": [
+    {
+      "id": "tome-1",
+      "title": "Le Trône fissuré",
+      "chapters": 30
+    },
+    {
+      "id": "tome-2",
+      "title": "Les Cendres d'hiver",
+      "chapters": 28
+    }
+  ]
+}

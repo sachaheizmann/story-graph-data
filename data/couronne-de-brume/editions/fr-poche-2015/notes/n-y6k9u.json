@@ -1,0 +1,11 @@
+{
+  "id": "n-y6k9u",
+  "about": {
+    "type": "character",
+    "id": "kael"
+  },
+  "start": {
+    "book": "tome-1",
+    "chapter": 16
+  }
+}

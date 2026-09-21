@@ -1,0 +1,25 @@
+{
+  "id": "fr-poche-2015",
+  "language": "fr",
+  "publisher": "Éditions Poche",
+  "year": 2015,
+  "based_on": "fr-original",
+  "created_by": [
+    "demo-contributor"
+  ],
+  "translators": [
+    "Marie Dupont"
+  ],
+  "books": [
+    {
+      "id": "tome-1",
+      "title": "Le Trône fissuré",
+      "chapters": 24
+    },
+    {
+      "id": "tome-2",
+      "title": "Les Cendres d'hiver",
+      "chapters": 22
+    }
+  ]
+}

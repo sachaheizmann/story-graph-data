@@ -5,7 +5,7 @@
   "description": "Ajouter un type est une décision du mainteneur (voir docs/MAINTAINER.md).",
   "type": "object",
   "minProperties": 1,
-  "propertyNames": { "pattern": "^[a-z]+(_[a-z]+)*$" },
+  "propertyNames": { "$ref": "common.schema.json#/$defs/relationType" },
   "additionalProperties": {
     "type": "object",
     "required": ["category", "directed"],

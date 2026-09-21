@@ -1,0 +1,11 @@
+{
+  "id": "n-gqst6",
+  "about": {
+    "type": "relation",
+    "id": "aria-kael-ally-2"
+  },
+  "start": {
+    "book": "tome-2",
+    "chapter": 5
+  }
+}

@@ -1,0 +1,187 @@
+[
+  {
+    "id": "aria-kael-ally-1",
+    "from": "aria",
+    "to": "kael",
+    "type": "ally",
+    "start": {
+      "book": "tome-1",
+      "chapter": 3
+    },
+    "end": {
+      "book": "tome-1",
+      "chapter": 8
+    }
+  },
+  {
+    "id": "aria-kael-ally-2",
+    "from": "aria",
+    "to": "kael",
+    "type": "ally",
+    "start": {
+      "book": "tome-2",
+      "chapter": 4
+    },
+    "end": null
+  },
+  {
+    "id": "aria-kael-enemy-1",
+    "from": "aria",
+    "to": "kael",
+    "type": "enemy",
+    "start": {
+      "book": "tome-1",
+      "chapter": 8
+    },
+    "end": {
+      "book": "tome-2",
+      "chapter": 4
+    }
+  },
+  {
+    "id": "aria-kael-sibling-1",
+    "from": "aria",
+    "to": "kael",
+    "type": "sibling_of",
+    "start": {
+      "book": "tome-1",
+      "chapter": 16
+    },
+    "end": null
+  },
+  {
+    "id": "aria-thessa-friend-1",
+    "from": "aria",
+    "to": "thessa",
+    "type": "friend",
+    "start": {
+      "book": "tome-1",
+      "chapter": 2
+    },
+    "end": null
+  },
+  {
+    "id": "aria-vaelor-enemy-1",
+    "from": "aria",
+    "to": "vaelor",
+    "type": "enemy",
+    "start": {
+      "book": "tome-1",
+      "chapter": 12
+    },
+    "end": null
+  },
+  {
+    "id": "edrin-ilan-parent-1",
+    "from": "edrin",
+    "to": "ilan",
+    "type": "parent_of",
+    "start": {
+      "book": "tome-1",
+      "chapter": 7
+    },
+    "end": null
+  },
+  {
+    "id": "edrin-maelis-spouse-1",
+    "from": "edrin",
+    "to": "maelis",
+    "type": "spouse_of",
+    "start": {
+      "book": "tome-1",
+      "chapter": 4
+    },
+    "end": null
+  },
+  {
+    "id": "edrin-vaelor-sibling-1",
+    "from": "edrin",
+    "to": "vaelor",
+    "type": "sibling_of",
+    "start": {
+      "book": "tome-1",
+      "chapter": 4
+    },
+    "end": null
+  },
+  {
+    "id": "garric-aria-parent-1",
+    "from": "garric",
+    "to": "aria",
+    "type": "parent_of",
+    "start": {
+      "book": "tome-1",
+      "chapter": 1
+    },
+    "end": null
+  },
+  {
+    "id": "garric-kael-parent-1",
+    "from": "garric",
+    "to": "kael",
+    "type": "parent_of",
+    "start": {
+      "book": "tome-1",
+      "chapter": 16
+    },
+    "end": null
+  },
+  {
+    "id": "kael-taron-rival-1",
+    "from": "kael",
+    "to": "taron",
+    "type": "rival",
+    "start": {
+      "book": "tome-1",
+      "chapter": 5
+    },
+    "end": null
+  },
+  {
+    "id": "maelis-ilan-parent-1",
+    "from": "maelis",
+    "to": "ilan",
+    "type": "parent_of",
+    "start": {
+      "book": "tome-1",
+      "chapter": 7
+    },
+    "end": null
+  },
+  {
+    "id": "maelis-vaelor-enemy-1",
+    "from": "maelis",
+    "to": "vaelor",
+    "type": "enemy",
+    "start": {
+      "book": "tome-1",
+      "chapter": 11
+    },
+    "end": null
+  },
+  {
+    "id": "orven-aria-mentor-1",
+    "from": "orven",
+    "to": "aria",
+    "type": "mentor_of",
+    "start": {
+      "book": "tome-1",
+      "chapter": 2
+    },
+    "end": null
+  },
+  {
+    "id": "vaelor-kael-servant-1",
+    "from": "vaelor",
+    "to": "kael",
+    "type": "servant_of",
+    "start": {
+      "book": "tome-1",
+      "chapter": 8
+    },
+    "end": {
+      "book": "tome-2",
+      "chapter": 4
+    }
+  }
+]

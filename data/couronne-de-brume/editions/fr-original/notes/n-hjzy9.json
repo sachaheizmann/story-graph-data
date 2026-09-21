@@ -1,0 +1,11 @@
+{
+  "id": "n-hjzy9",
+  "about": {
+    "type": "character",
+    "id": "edrin"
+  },
+  "start": {
+    "book": "tome-1",
+    "chapter": 12
+  }
+}

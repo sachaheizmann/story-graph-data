@@ -1,0 +1,38 @@
+{
+  "ally": {
+    "category": "social",
+    "directed": false
+  },
+  "enemy": {
+    "category": "social",
+    "directed": false
+  },
+  "friend": {
+    "category": "social",
+    "directed": false
+  },
+  "mentor_of": {
+    "category": "social",
+    "directed": true
+  },
+  "parent_of": {
+    "category": "family",
+    "directed": true
+  },
+  "rival": {
+    "category": "social",
+    "directed": false
+  },
+  "servant_of": {
+    "category": "social",
+    "directed": true
+  },
+  "sibling_of": {
+    "category": "family",
+    "directed": false
+  },
+  "spouse_of": {
+    "category": "family",
+    "directed": false
+  }
+}
