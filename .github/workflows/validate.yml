@@ -1,0 +1,82 @@
+# Validation des contributions : contrôle de périmètre (Pull Requests), tests, contrôle des données et format.
+#
+# SÉCURITÉ — à lire avant de modifier ce fichier (voir aussi docs/MAINTAINER.md) :
+#  1. Événement « pull_request », JAMAIS « pull_request_target » : le code d'une Pull Request s'exécute avec
+#     un jeton en lecture seule et sans accès aux secrets du dépôt.
+#  2. Le contrôle de périmètre est exécuté depuis une copie de la branche main, récupérée dans un dossier à
+#     part (« trusted »), et non depuis la Pull Request : une PR ne peut pas changer les règles qui la jugent.
+#  3. Ce contrôle est une AIDE, pas la protection : une PR peut modifier ce fichier lui-même. La vraie
+#     protection est le réglage GitHub « Require review from Code Owners » (le dossier .github/ est protégé
+#     par le fichier CODEOWNERS).
+#  4. Les valeurs venues de la Pull Request (titre, nom de branche…) ne sont JAMAIS écrites directement dans
+#     une commande « run » : on les passe par des variables d'environnement.
+#  5. Les actions sont épinglées par empreinte de commit (et non par étiquette, qui peut être déplacée).
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Jeton en lecture seule : ce workflow n'a besoin d'écrire nulle part.
+permissions:
+  contents: read
+
+# Une nouvelle poussée sur une même PR annule l'exécution précédente (pas sur main).
+concurrency:
+  group: validate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # Le nom de ce job est « validate » : c'est le contrôle à rendre obligatoire dans la protection de main.
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: pr
+    steps:
+      - name: Récupérer la version à tester (la PR fusionnée avec main)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: pr
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Récupérer une copie de confiance de la branche main (dossier à part)
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          path: trusted
+          persist-credentials: false
+
+      # Placé AVANT toute installation : si la PR sort de son périmètre, aucun de ses codes ne s'exécute.
+      - name: Contrôle de périmètre (script de main, pas celui de la PR)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
+        run: |
+          git rev-parse --verify --quiet HEAD^2 > /dev/null || { echo "::error title=Contrôle de périmètre::Le commit testé n'est pas la fusion attendue de la Pull Request."; exit 1; }
+          git diff --name-only --no-renames -z HEAD^1 HEAD | node ../trusted/scripts/check-scope.mjs
+
+      - name: Installer Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 20 # version minimale prise en charge (voir « engines » dans package.json)
+          cache: npm
+          cache-dependency-path: pr/package-lock.json
+
+      - name: Installer les dépendances (sans exécuter de scripts d'installation)
+        run: npm ci --ignore-scripts
+
+      - name: Tests des scripts
+        run: npm test
+
+      - name: Contrôle des données
+        run: npm run check
+
+      - name: Contrôle du format
+        run: npm run format -- --check

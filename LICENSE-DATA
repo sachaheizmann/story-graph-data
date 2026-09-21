@@ -14,12 +14,8 @@ commercialement, à condition de :
 
 Résumé officiel : https://creativecommons.org/licenses/by-sa/4.0/deed.fr
 
-Attribution à utiliser : « Données du projet <NOM-DU-PROJET> et de ses
-contributeurs, <URL-DU-DÉPÔT>, licence CC BY-SA 4.0 ».
-
-!!! TODO (mainteneur) : remplacer <NOM-DU-PROJET> et <URL-DU-DÉPÔT> ci-dessus
-!!! par le nom et l'adresse GitHub définitifs du dépôt, puis supprimer cette
-!!! ligne.
+Attribution à utiliser : « Données des contributeurs de story-graph-data,
+https://github.com/sachaheizmann/story-graph-data, licence CC BY-SA 4.0 ».
 
 Important : ces données ne contiennent que des FAITS sur des œuvres (« X est le
 frère de Y ») et des notes écrites avec les mots des contributeurs. Aucun

@@ -71,6 +71,9 @@ export function scanFiles(dataDir) {
   return found;
 }
 
+/** Vrai si le chemin est un lien symbolique (interdit dans data/ : il pourrait pointer hors du dossier). */
+export const isSymlink = (dataDir, rel) => lstatSync(path.join(dataDir, ...rel.split('/'))).isSymbolicLink();
+
 /** Problèmes de nom : extension refusée, ou dossier / fichier qui n'est pas en minuscules, chiffres et tirets. */
 export function nameProblems(rel) {
   const parts = rel.split('/');
@@ -135,6 +138,13 @@ export function loadDataset(dataDir, ajv) {
 
   for (const rel of scanFiles(dataDir)) {
     const file = displayPath(rel);
+
+    if (isSymlink(dataDir, rel)) {
+      add(file, 'files.symlink',
+        'Ce fichier est un lien symbolique : ils sont interdits dans data/ (il pourrait pointer vers un fichier extérieur au dépôt).',
+        { fix: 'Remplacez-le par un vrai fichier contenant les données.' });
+      continue;
+    }
 
     // Règle 9 : rien d'autre que du JSON / Markdown, noms en minuscules-chiffres-tirets.
     if (!hasAllowedExtension(rel)) {

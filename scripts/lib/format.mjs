@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { loadSchemas } from './schemas.mjs';
-import { SCHEMA_OF, classify, displayPath, scanFiles } from './dataset.mjs';
+import { SCHEMA_OF, classify, displayPath, isSymlink, scanFiles } from './dataset.mjs';
 
 const SCHEMAS = loadSchemas();
 
@@ -109,7 +109,7 @@ export function formatDataset(dataDir, { write }) {
   let checked = 0;
   for (const rel of scanFiles(dataDir)) {
     const found = classify(rel);
-    if (!found) continue; // fichier inattendu : c'est l'affaire de « npm run check »
+    if (!found || isSymlink(dataDir, rel)) continue; // fichier inattendu ou lien symbolique : c'est l'affaire de « npm run check »
     checked += 1;
     const raw = read(rel);
     const formatted = canonicalText(found.kind, raw, { relationTypes });

@@ -9,10 +9,13 @@ import { checkReferences } from './rules/references.mjs';
 import { checkPositions } from './rules/positions.mjs';
 import { checkUniqueness } from './rules/uniqueness.mjs';
 import { checkTexts } from './rules/texts.mjs';
+import { checkWarnings } from './rules/warnings.mjs';
+import { isError, isWarning } from './issues.mjs';
 
 /**
  * Vérifie un dossier data/.
- * @returns {{issues: object[], fileCount: number, dataset: object}}
+ * @returns {{issues: object[], errors: object[], warnings: object[], fileCount: number, dataset: object}}
+ *   issues = errors (bloquent) + warnings (avertissements, ne bloquent pas)
  */
 export function checkDataset(dataDir) {
   const dataset = loadDataset(dataDir, createAjv());
@@ -23,6 +26,7 @@ export function checkDataset(dataDir) {
   checkPositions(dataset, add);
   checkUniqueness(dataset, add);
   checkTexts(dataset, add);
+  checkWarnings(dataset, add);
 
   // Les outils « new-* » laissent un marqueur : on refuse qu'il reste dans un fichier.
   for (const entry of dataset.entries) {
@@ -48,5 +52,5 @@ export function checkDataset(dataDir) {
   }
 
   const issues = dataset.issues.slice().sort((a, b) => a.file.localeCompare(b.file) || a.rule.localeCompare(b.rule) || a.message.localeCompare(b.message));
-  return { issues, fileCount: dataset.entries.length, dataset };
+  return { issues, errors: issues.filter(isError), warnings: issues.filter(isWarning), fileCount: dataset.entries.length, dataset };
 }

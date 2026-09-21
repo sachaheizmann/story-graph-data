@@ -1,0 +1,38 @@
+# Prévient l'hébergeur du site qu'il doit se reconstruire, après chaque fusion dans main.
+#
+# Le secret DEPLOY_HOOK_URL contient l'adresse (secrète) du « deploy hook » de l'hébergeur (voir docs/MAINTAINER.md).
+# - S'il n'existe pas, le workflow se termine proprement, sans erreur.
+# - Il n'est JAMAIS affiché dans les logs : il n'est lu que par une variable d'environnement, et les messages
+#   de curl (qui pourraient citer l'adresse) sont volontairement supprimés.
+name: notify-deploy
+
+on:
+  push:
+    branches: [main]
+  # Permet au mainteneur de relancer à la main (onglet Actions > notify-deploy > Run workflow).
+  workflow_dispatch:
+
+# Aucun droit sur le dépôt : ce workflow n'a besoin que d'envoyer une requête à l'extérieur.
+permissions: {}
+
+jobs:
+  notify:
+    name: notify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Prévenir l'hébergeur du site
+        shell: bash
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_HOOK_URL" ]; then
+            echo "Le secret DEPLOY_HOOK_URL n'existe pas : rien à faire (le site ne sera pas reconstruit automatiquement)."
+            exit 0
+          fi
+          if curl --silent --fail --max-time 30 --retry 2 -X POST "$DEPLOY_HOOK_URL" --output /dev/null 2> /dev/null; then
+            echo "✓ L'hébergeur du site a été prévenu."
+          else
+            echo "::error title=Notification du site::L'appel au deploy hook a échoué (code $?). L'adresse n'est volontairement pas affichée : vérifiez le secret DEPLOY_HOOK_URL."
+            exit 1
+          fi

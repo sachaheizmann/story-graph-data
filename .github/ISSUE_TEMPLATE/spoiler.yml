@@ -1,0 +1,83 @@
+name: Signaler un spoiler
+description: Une description, une note ou un lien révèle quelque chose trop tôt
+title: "[Spoiler] "
+labels: ["spoiler"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci ! Un spoiler gâche la lecture : c'est la première chose à corriger dans ce projet.
+
+        **Cette issue est publique.** N'écrivez pas le spoiler dans le titre, et cachez-le dans le bloc prévu plus bas.
+
+        Rappel de la règle : **chaque `start` est le moment où le lecteur l'apprend, jamais le moment où c'est vrai dans l'histoire.**
+  - type: input
+    id: edition
+    attributes:
+      label: Édition concernée
+      description: Au format saga/édition.
+      placeholder: couronne-de-brume/fr-original
+    validations:
+      required: true
+  - type: dropdown
+    id: element
+    attributes:
+      label: Type d'élément concerné
+      options:
+        - Description d'un personnage
+        - Note
+        - Lien (relations.json)
+        - Fin (« end ») d'un personnage
+        - Description de la saga
+        - Autre
+    validations:
+      required: true
+  - type: input
+    id: element-id
+    attributes:
+      label: Identifiant de l'élément
+      description: L'identifiant du personnage, du lien ou de la note (sans le spoiler).
+      placeholder: "aria, aria-kael-ally-1, n-7k2p9…"
+    validations:
+      required: true
+  - type: input
+    id: reading-position
+    attributes:
+      label: Position de lecture
+      description: Jusqu'où avez-vous lu quand vous avez vu ce spoiler ?
+      placeholder: tome-1, chapitre 5
+    validations:
+      required: true
+  - type: textarea
+    id: revealed
+    attributes:
+      label: Ce qui est révélé trop tôt
+      description: Décrivez le spoiler à l'intérieur du bloc ci-dessous, avec vos propres mots (ne recopiez pas de passage du livre).
+      value: |
+        <details>
+        <summary>Détail du spoiler (cliquez pour afficher)</summary>
+
+        Écrivez ici.
+
+        </details>
+    validations:
+      required: true
+  - type: input
+    id: reveal-position
+    attributes:
+      label: À partir de quand le lecteur l'apprend-il vraiment ? (facultatif)
+      placeholder: tome-1, chapitre 20
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Correction proposée (facultatif)
+      description: Par exemple « déplacer cette phrase dans une note qui commence au chapitre 20 ».
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Vérifications
+      options:
+        - label: J'ai caché le détail du spoiler dans le bloc ci-dessus et pas dans le titre.
+          required: true
+        - label: Je n'ai recopié aucun passage du livre.
+          required: true

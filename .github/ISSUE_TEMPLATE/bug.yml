@@ -1,0 +1,55 @@
+name: Signaler un bug
+description: Une commande ou un contrôle ne fait pas ce qu'il devrait
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de prendre le temps de le signaler ! Pour un spoiler dans les données, utilisez plutôt le modèle « Signaler un spoiler ».
+  - type: textarea
+    id: what
+    attributes:
+      label: Ce qui ne va pas
+      description: Que s'est-il passé ? Qu'attendiez-vous ?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Comment le reproduire
+      description: Les commandes lancées, dans l'ordre.
+      placeholder: |
+        1. npm install
+        2. npm run new-edition -- --saga couronne-de-brume --from fr-original --id fr-test
+        3. …
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Message affiché
+      description: Copiez le message d'erreur complet.
+      render: shell
+  - type: input
+    id: node
+    attributes:
+      label: Version de Node.js
+      description: Résultat de « node --version ».
+      placeholder: v20.11.0
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Système
+      placeholder: Windows 11, macOS 14, Ubuntu 24.04…
+    validations:
+      required: true
+  - type: checkboxes
+    id: checked
+    attributes:
+      label: Vérification
+      options:
+        - label: "J'ai cherché parmi les issues existantes : ce problème n'est pas déjà signalé."
+          required: true

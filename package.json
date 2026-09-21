@@ -1,8 +1,16 @@
 {
-  "name": "book-tree-data",
+  "name": "story-graph-data",
   "version": "0.1.0",
   "private": true,
   "description": "Données (arbres généalogiques et graphes de relations de livres, sans spoiler), règles de validation et outils pour contribuer.",
+  "homepage": "https://github.com/sachaheizmann/story-graph-data#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sachaheizmann/story-graph-data.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sachaheizmann/story-graph-data/issues"
+  },
   "license": "SEE LICENSE IN LICENSE-SCRIPTS",
   "type": "module",
   "engines": {

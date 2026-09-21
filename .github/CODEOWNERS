@@ -1,0 +1,29 @@
+# CODEOWNERS : qui doit relire quoi.
+#
+# Avec le réglage GitHub « Require review from Code Owners » (docs/MAINTAINER.md, réglage n° 1, OBLIGATOIRE),
+# une Pull Request qui touche l'un de ces fichiers ne peut être fusionnée qu'avec l'accord de son propriétaire.
+# C'est la VRAIE protection des règles, des outils et de l'automatisation. Ce fichier est lu depuis la branche
+# main : une Pull Request ne peut pas le modifier à son avantage.
+#
+# Si plusieurs lignes correspondent à un fichier, c'est la DERNIÈRE qui s'applique.
+
+# Les fichiers à la racine : README, CONTRIBUTING, licences, package.json…
+/*                                   @sachaheizmann
+
+# Les règles, les outils et l'automatisation.
+/schema/                             @sachaheizmann
+/scripts/                            @sachaheizmann
+/.github/                            @sachaheizmann
+/docs/                               @sachaheizmann
+
+# Les données (data/) n'ont volontairement PAS de propriétaire : la communauté les relit, puis le mainteneur
+# les accepte grâce à l'approbation obligatoire de la protection de main. La ligne suivante, sans propriétaire,
+# l'affirme clairement.
+/data/
+
+# Exception : ajouter un type de lien est une décision du mainteneur (docs/MAINTAINER.md).
+/data/_common/relation-types.json    @sachaheizmann
+
+# Exemple, à décommenter le jour où une personne relit les traductions anglaises. Elle est ajoutée à côté du
+# mainteneur (les deux peuvent approuver) ; sans « @sachaheizmann », elle deviendrait seule propriétaire.
+# /data/*/editions/*/text/en/        @pseudo-du-relecteur @sachaheizmann

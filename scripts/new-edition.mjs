@@ -49,9 +49,10 @@ await runMain(async () => {
   console.log(`✓ Édition « ${created.saga}/${created.id} » créée par copie de « ${created.from} » (based_on renseigné).`);
 
   console.log('\nValidation de data/ …');
-  const { issues, fileCount } = checkDataset(dataDir);
-  if (issues.length === 0) {
-    console.log(`✓ ${fileCount} fichiers vérifiés, aucun problème.`);
+  const { issues, errors, fileCount } = checkDataset(dataDir);
+  if (errors.length === 0) {
+    if (issues.length > 0) console.error(formatIssues(issues));
+    console.log(`✓ ${fileCount} fichiers vérifiés, aucun problème${issues.length > 0 ? ' bloquant' : ''}.`);
   } else {
     console.error(formatIssues(issues));
     if (created.sourceLanguage !== language) {
@@ -67,5 +68,5 @@ Prochaines étapes :
      chaque position est le chapitre de CETTE édition où le lecteur l'apprend (« révélé ≠ vrai »).
   3. Les identifiants (aria, kael…) NE CHANGENT PAS : ne renommez rien.
   4. Lancez « npm run check », puis ouvrez une Pull Request.`);
-  if (issues.length > 0) process.exit(1);
+  if (errors.length > 0) process.exit(1);
 });

@@ -1,0 +1,41 @@
+name: Faire une suggestion
+description: Une idée pour les outils, les règles de validation, la documentation ou un nouveau type de lien
+title: "[Suggestion] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci ! Les règles, les outils et la documentation (schema/, scripts/, docs/…) sont modifiés par le mainteneur : une issue est le bon endroit pour proposer une amélioration.
+
+        Pour ajouter des personnages, des liens, des notes ou des traductions, ouvrez directement une Pull Request (voir CONTRIBUTING.md).
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Sujet
+      options:
+        - Nouveau type de lien (ex. « cousin_of »)
+        - Nouvelle commande ou amélioration d'une commande
+        - Nouvelle règle de validation
+        - Documentation
+        - Autre
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Votre proposition
+      description: Que faudrait-il ajouter ou changer ?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Pourquoi c'est utile
+      description: Quel problème cela résout-il ? Un exemple concret aide beaucoup (sans spoiler !).
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Autres solutions envisagées (facultatif)
