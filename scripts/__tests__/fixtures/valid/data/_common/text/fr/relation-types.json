@@ -1,0 +1,16 @@
+{
+  "ally": {
+    "label": "est allié(e) avec"
+  },
+  "master_of": {
+    "label": "est le maître de",
+    "reverse_label": "est le serviteur de"
+  },
+  "parent_of": {
+    "label": "est le parent de",
+    "reverse_label": "a pour parent"
+  },
+  "sibling_of": {
+    "label": "est frère ou sœur de"
+  }
+}

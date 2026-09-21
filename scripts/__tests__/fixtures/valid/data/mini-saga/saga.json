@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "mini-saga",
+  "demo": true,
+  "authors": [
+    "writer"
+  ],
+  "defaultEdition": "fr-a"
+}

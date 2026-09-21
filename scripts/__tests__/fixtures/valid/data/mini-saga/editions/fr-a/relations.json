@@ -1,0 +1,38 @@
+[
+  {
+    "id": "ann-bob-sibling-1",
+    "from": "ann",
+    "to": "bob",
+    "type": "sibling_of",
+    "start": {
+      "book": "tome-1",
+      "chapter": 5
+    },
+    "end": null
+  },
+  {
+    "id": "ann-cat-parent-1",
+    "from": "ann",
+    "to": "cat",
+    "type": "parent_of",
+    "start": {
+      "book": "tome-1",
+      "chapter": 3
+    },
+    "end": null
+  },
+  {
+    "id": "bob-cat-ally-1",
+    "from": "bob",
+    "to": "cat",
+    "type": "ally",
+    "start": {
+      "book": "tome-1",
+      "chapter": 4
+    },
+    "end": {
+      "book": "tome-2",
+      "chapter": 1
+    }
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "ally": {
+    "label": "is allied with"
+  },
+  "parent_of": {
+    "label": "is the parent of"
+  }
+}

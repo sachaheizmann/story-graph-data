@@ -1,0 +1,22 @@
+{
+  "id": "fr-b",
+  "language": "fr",
+  "publisher": "Éditeur B",
+  "year": 2015,
+  "based_on": "fr-a",
+  "created_by": [
+    "demo-user"
+  ],
+  "books": [
+    {
+      "id": "tome-1",
+      "title": "Premier tome",
+      "chapters": 8
+    },
+    {
+      "id": "tome-2",
+      "title": "Second tome",
+      "chapters": 4
+    }
+  ]
+}

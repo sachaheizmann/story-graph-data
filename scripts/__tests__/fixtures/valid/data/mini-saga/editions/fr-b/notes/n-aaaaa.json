@@ -1,0 +1,11 @@
+{
+  "id": "n-aaaaa",
+  "about": {
+    "type": "character",
+    "id": "ann"
+  },
+  "start": {
+    "book": "tome-1",
+    "chapter": 4
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "ally": {
+    "category": "social",
+    "directed": false
+  },
+  "master_of": {
+    "category": "social",
+    "directed": true
+  },
+  "parent_of": {
+    "category": "family",
+    "directed": true
+  },
+  "sibling_of": {
+    "category": "family",
+    "directed": false
+  }
+}

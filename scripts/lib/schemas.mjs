@@ -1,11 +1,10 @@
 // Chargement des schémas JSON (dossier schema/) et création des validateurs ajv.
 import { readdirSync, readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
+import { SCHEMA_DIR } from './paths.mjs';
 
-export const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-export const SCHEMA_DIR = path.join(ROOT_DIR, 'schema');
+export { ROOT_DIR, SCHEMA_DIR } from './paths.mjs';
 
 /** Lit tous les schémas : { nom: schéma }, où le nom est celui du fichier sans « .schema.json ». */
 export function loadSchemas(schemaDir = SCHEMA_DIR) {

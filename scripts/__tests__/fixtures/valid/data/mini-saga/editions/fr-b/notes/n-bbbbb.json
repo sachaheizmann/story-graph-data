@@ -1,0 +1,11 @@
+{
+  "id": "n-bbbbb",
+  "about": {
+    "type": "relation",
+    "id": "ann-bob-sibling-1"
+  },
+  "start": {
+    "book": "tome-1",
+    "chapter": 5
+  }
+}

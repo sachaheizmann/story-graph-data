@@ -1,0 +1,22 @@
+{
+  "id": "fr-a",
+  "language": "fr",
+  "publisher": "Éditeur A",
+  "year": 2010,
+  "based_on": null,
+  "created_by": [
+    "demo-user"
+  ],
+  "books": [
+    {
+      "id": "tome-1",
+      "title": "Premier tome",
+      "chapters": 10
+    },
+    {
+      "id": "tome-2",
+      "title": "Second tome",
+      "chapters": 5
+    }
+  ]
+}
