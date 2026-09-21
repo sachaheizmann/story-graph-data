@@ -5,14 +5,14 @@ import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { ALLOWED_PREFIX, TRUSTED_ASSOCIATIONS, checkScope, isInScope, parseFileList } from '../check-scope.mjs';
+import { ALLOWED_PREFIX, EXEMPT_LOGINS, TRUSTED_ASSOCIATIONS, checkScope, isInScope, parseFileList } from '../check-scope.mjs';
 import { SCRIPTS_DIR } from './helpers.mjs';
 
 const SCRIPT = path.join(SCRIPTS_DIR, 'check-scope.mjs');
-const run = (files, association, { env = {} } = {}) => spawnSync(process.execPath, [SCRIPT, ...(association ? ['--association', association] : [])], {
+const run = (files, association, { env = {}, login } = {}) => spawnSync(process.execPath, [SCRIPT, ...(association ? ['--association', association] : []), ...(login ? ['--login', login] : [])], {
   input: files.join('\0'),
   encoding: 'utf8',
-  env: { ...process.env, AUTHOR_ASSOCIATION: '', ...env },
+  env: { ...process.env, AUTHOR_ASSOCIATION: '', AUTHOR_LOGIN: '', ...env },
 });
 
 // ------------------------------------------------------------------ la règle
@@ -20,7 +20,7 @@ test('les auteurs de confiance (OWNER, MEMBER, COLLABORATOR) peuvent modifier n\
   assert.deepEqual(TRUSTED_ASSOCIATIONS, ['OWNER', 'MEMBER', 'COLLABORATOR']);
   for (const association of TRUSTED_ASSOCIATIONS) {
     const result = checkScope({ files: ['scripts/check.mjs', '.github/CODEOWNERS', 'README.md'], association });
-    assert.deepEqual(result, { ok: true, trusted: true, outOfScope: [] });
+    assert.deepEqual(result, { ok: true, trusted: true, exempt: false, outOfScope: [] });
   }
 });
 
@@ -73,6 +73,32 @@ test('la liste est lue avec des NUL : espaces et retours à la ligne dans les no
   assert.deepEqual(parseFileList(''), []);
 });
 
+// ------------------------------------------------------------------ Dependabot
+const DEPENDABOT_FILES = ['.github/workflows/validate.yml', 'package.json', 'package-lock.json'];
+
+test('Dependabot : l\'auteur « dependabot[bot] » est exempté, même sans statut de confiance', () => {
+  assert.deepEqual(EXEMPT_LOGINS, ['dependabot[bot]']);
+  for (const association of ['NONE', 'CONTRIBUTOR', undefined]) {
+    const result = checkScope({ files: DEPENDABOT_FILES, association, login: 'dependabot[bot]' });
+    assert.deepEqual(result, { ok: true, trusted: false, exempt: true, outOfScope: [] }, String(association));
+  }
+});
+
+test('Dependabot : personne ne peut se faire passer pour lui (comparaison exacte du nom)', () => {
+  const lookalikes = ['dependabot', 'Dependabot[bot]', 'DEPENDABOT[BOT]', 'dependabot[bot] ', ' dependabot[bot]', 'dependabot[bot]-fake',
+    'not-dependabot[bot]', 'dependabot-bot', 'github-actions[bot]', 'renovate[bot]', 'dependabot[bot]\n', '', undefined, null];
+  for (const login of lookalikes) {
+    const result = checkScope({ files: DEPENDABOT_FILES, association: 'NONE', login });
+    assert.equal(result.ok, false, JSON.stringify(login));
+    assert.equal(result.exempt, false, JSON.stringify(login));
+  }
+});
+
+test('Dependabot : l\'exemption ne dépend pas du statut : un auteur de confiance reste « de confiance », pas « exempté »', () => {
+  assert.deepEqual(checkScope({ files: ['scripts/x'], association: 'OWNER', login: 'dependabot[bot]' }),
+    { ok: true, trusted: true, exempt: false, outOfScope: [] });
+});
+
 // ------------------------------------------------------------------ la commande
 test('commande : une personne extérieure qui modifie scripts/ échoue, avec une explication française', () => {
   const result = run(['data/ma-saga/saga.json', 'scripts/lib/check.mjs'], 'FIRST_TIME_CONTRIBUTOR');
@@ -104,6 +130,20 @@ test('commande : le statut peut venir de la variable AUTHOR_ASSOCIATION (comme d
   const missing = run(['scripts/x.mjs'], undefined);
   assert.equal(missing.status, 1, 'sans statut connu : règle stricte');
   assert.match(missing.stderr, /votre statut sur ce dépôt est inconnu/i);
+});
+
+test('commande : Dependabot est exempté (option --login ou variable AUTHOR_LOGIN) et le message rappelle la revue de propriétaire', () => {
+  for (const result of [run(DEPENDABOT_FILES, 'NONE', { login: 'dependabot[bot]' }), run(DEPENDABOT_FILES, undefined, { env: { AUTHOR_ASSOCIATION: 'NONE', AUTHOR_LOGIN: 'dependabot[bot]' } })]) {
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /Auteur exempté du contrôle de périmètre \(dependabot\[bot\]\)/);
+    assert.match(result.stdout, /reste soumise à la revue de propriétaire \(Code Owners\)/);
+  }
+});
+
+test('commande : un faux Dependabot est refusé comme n\'importe quelle personne extérieure', () => {
+  const result = run(DEPENDABOT_FILES, 'CONTRIBUTOR', { login: 'dependabot-bot' });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /- \.github\/workflows\/validate\.yml/);
 });
 
 test('commande : beaucoup de fichiers hors périmètre sont résumés', () => {
@@ -173,6 +213,17 @@ test('git : une PR qui modifie scripts/ est refusée pour une personne extérieu
     assert.equal(result.status, 1);
     assert.match(result.stderr, /^ {2}- scripts\/check\.mjs$/m);
     assert.equal(scopeOfMerge(repo, 'OWNER').status, 0, 'le mainteneur peut');
+  } finally { rmSync(repo, { recursive: true, force: true }); }
+});
+
+test('git : une PR de Dependabot (.github/ et package.json) passe, la même PR d\'un inconnu est refusée', { skip: !hasGit }, () => {
+  const repo = makePullRequest(({ put }) => { put('.github/workflows/validate.yml', 'name: validate\n'); put('package.json', '{}\n'); });
+  try {
+    const bot = spawnSync('bash', ['-c', `set -o pipefail; git diff --name-only --no-renames -z HEAD^1 HEAD | node "${SCRIPT}"`], {
+      cwd: repo, encoding: 'utf8', env: { ...process.env, AUTHOR_ASSOCIATION: 'NONE', AUTHOR_LOGIN: 'dependabot[bot]', GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_SYSTEM: '/dev/null' },
+    });
+    assert.equal(bot.status, 0, bot.stderr);
+    assert.equal(scopeOfMerge(repo, 'NONE').status, 1, 'sans le nom de Dependabot, la PR est refusée');
   } finally { rmSync(repo, { recursive: true, force: true }); }
 });
 

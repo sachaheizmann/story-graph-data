@@ -20,8 +20,12 @@ Il y a donc deux couches :
 
 À faire dans cet ordre, **après** avoir créé le dépôt sur GitHub et y avoir envoyé le code :
 
+> **Ordre important : réglez la protection de `main` APRÈS le premier lancement de `validate`, pas avant.**
+> L'envoi initial du code sur `main` lance tout seul le workflow `validate`, une fois par version de Node : il produit **deux** contrôles, nommés **`validate (Node 24)`** et **`validate (Node 22)`**. Attendez qu'ils aient fini (onglet [Actions](https://github.com/sachaheizmann/story-graph-data/actions), coches vertes). GitHub ne les propose dans la liste des contrôles à rendre obligatoires qu'**après** leur premier lancement : si vous réglez la protection avant, la recherche ne trouvera rien.
+> Toute la règle de protection (Code Owners compris) se crée alors **en une seule fois**, sections 1 et 2 ci-dessous.
+
 1. [ ] Réglage n° 1 : **Require review from Code Owners** (OBLIGATOIRE) → [section 1](#1-réglage-obligatoire--require-review-from-code-owners)
-2. [ ] Protection complète de `main` → [section 2](#2-le-reste-de-la-protection-de-main)
+2. [ ] Protection complète de `main`, avec les **deux** contrôles `validate` obligatoires → [section 2](#2-le-reste-de-la-protection-de-main)
 3. [ ] Réglages des Actions (dont **Require approval for all outside collaborators**) → [section 3](#3-réglages-des-actions)
 4. [ ] Secret `DEPLOY_HOOK_URL` → [section 4](#4-le-secret-deploy_hook_url)
 5. [ ] Étiquette `spoiler` → [section 5](#5-créer-létiquette-spoiler)
@@ -42,9 +46,9 @@ Ce que fait ce réglage : le fichier [`.github/CODEOWNERS`](../.github/CODEOWNER
 3. Dans « Branch name pattern », écrivez `main`.
 4. Cochez **Require a pull request before merging**. Des options apparaissent dessous.
 5. Cochez **Require review from Code Owners**. ← *c'est ce réglage*
-6. Cliquez **Create** (ou **Save changes**) en bas de la page.
+6. **Ne cliquez pas encore sur Create.** Passez à la section 2, cochez le reste de la règle, puis créez-la en une seule fois.
 
-Les autres cases de cette même règle sont dans la [section 2](#2-le-reste-de-la-protection-de-main) : cochez-les toutes en une seule fois.
+Les autres cases de cette même règle sont dans la [section 2](#2-le-reste-de-la-protection-de-main), y compris les deux contrôles `validate` (qui n'existent dans la liste qu'après le premier lancement).
 
 ### Un piège quand on est seul mainteneur
 
@@ -58,7 +62,7 @@ GitHub **interdit d'approuver sa propre Pull Request**. Si vous ouvrez vous-mêm
 
 ## 2. Le reste de la protection de `main`
 
-Dans la **même règle** (Settings > Branches > règle sur `main`), cochez :
+**Faites cette étape APRÈS le premier lancement de `validate`** (voir « Ordre important » plus haut). Dans la **même règle** (Settings > Branches > règle sur `main`), cochez :
 
 | Case | Pourquoi |
 |---|---|
@@ -67,10 +71,14 @@ Dans la **même règle** (Settings > Branches > règle sur `main`), cochez :
 | **Dismiss stale pull request approvals when new commits are pushed** | Si la PR change après votre approbation, elle doit être relue. |
 | **Require review from Code Owners** | Voir la section 1 (**obligatoire**). |
 | **Require status checks to pass before merging** | Une PR dont les contrôles échouent ne peut pas être fusionnée. |
-| ↳ dans la zone de recherche, ajoutez le contrôle **`validate`** | C'est le nom du job de [`validate.yml`](../.github/workflows/validate.yml). *Il n'apparaît dans la recherche qu'après avoir tourné au moins une fois : ouvrez d'abord une PR de test (section 6).* |
+| ↳ dans la zone de recherche, ajoutez **les deux** contrôles : **`validate (Node 24)`** et **`validate (Node 22)`** | Ce sont les deux lignes de la matrice de [`validate.yml`](../.github/workflows/validate.yml). **Rendez-les tous les deux obligatoires** : si un seul l'est, une PR peut être fusionnée alors que le code casse sur l'autre version de Node. *Ils n'apparaissent dans la recherche qu'après avoir tourné au moins une fois.* |
 | **Require conversation resolution before merging** | Toutes les remarques de relecture doivent être traitées (« Resolve conversation »). |
 | **Do not allow bypassing the above settings** | **Laissez décochée** (voir le piège ci-dessus). |
 | **Allow force pushes** / **Allow deletions** | Laissez **décochées** (par défaut) : personne ne peut réécrire l'historique de `main` ni le supprimer. |
+
+Cliquez ensuite **Create** (ou **Save changes**) en bas de la page.
+
+> **Si vous changez un jour les versions de Node testées** (ligne `node: [24, 22]` de `validate.yml`) : mettez à jour cette liste de contrôles obligatoires. Un contrôle qui n'existe plus reste « attendu » et bloquerait toutes les PR.
 
 Côté fusion, dans [Settings > General](https://github.com/sachaheizmann/story-graph-data/settings), section « Pull Requests », il est conseillé de ne garder que **Allow squash merging** (une contribution = un commit propre sur `main`) et de cocher **Automatically delete head branches**.
 
@@ -86,7 +94,7 @@ Ouvrez [Settings > Actions > General](https://github.com/sachaheizmann/story-gra
 3. Laissez **décochée** la case **Allow GitHub Actions to create and approve pull requests**.
 4. Cliquez **Save**.
 
-Ces réglages s'ajoutent à la sécurité déjà prévue dans les workflows : événement `pull_request` (et jamais `pull_request_target`), jeton en lecture seule, actions épinglées par empreinte de commit, dépendances installées sans scripts d'installation (`npm ci --ignore-scripts`), et aucun secret accessible au code des PR.
+Ces réglages s'ajoutent à la sécurité déjà prévue dans les workflows : événement `pull_request` (et jamais `pull_request_target`), jeton en lecture seule, actions épinglées par empreinte de commit, dépendances installées sans scripts d'installation (`npm ci --ignore-scripts`), `npm test` limité aux fichiers de `scripts/` (jamais ceux de `data/`), et aucun secret accessible au code des PR.
 
 ---
 
@@ -136,7 +144,7 @@ Trois petites Pull Requests de test, une fois les réglages faits. Vous pouvez l
 |---|---|
 | **A. PR d'un compte extérieur qui modifie `scripts/`** (utilisez un deuxième compte GitHub, ou demandez à une connaissance) | Les contrôles attendent votre clic « Approve and run workflows ». Une fois lancés, `validate` échoue à l'étape « Contrôle de périmètre » avec un message en français. |
 | **B. PR de votre compte qui modifie `scripts/` ou `.github/`** | GitHub affiche « Review required » avec vous comme *Code Owner*. Sans le réglage n° 1, ce message n'apparaîtrait pas. |
-| **C. PR qui ne modifie qu'un fichier de `data/`** | `validate` passe au vert, et il faut votre approbation pour fusionner. |
+| **C. PR qui ne modifie qu'un fichier de `data/`** | Les **deux** contrôles `validate (Node 24)` et `validate (Node 22)` passent au vert, et il faut votre approbation pour fusionner. |
 
 Si le test B n'affiche pas d'exigence de relecture par un propriétaire, revenez à la [section 1](#1-réglage-obligatoire--require-review-from-code-owners) : le réglage n'est pas actif. Vous pouvez aussi ouvrir le fichier [`CODEOWNERS`](https://github.com/sachaheizmann/story-graph-data/blob/main/.github/CODEOWNERS) sur GitHub : il signale les erreurs de syntaxe en haut de page.
 
@@ -188,11 +196,47 @@ Ajouter un type de lien est **votre décision**, pas celle des contributeurs : t
 
 ---
 
+## Dependabot, les mises à jour automatiques
+
+Le fichier [`.github/dependabot.yml`](../.github/dependabot.yml) demande à **Dependabot**, le robot de GitHub, de vérifier chaque lundi si les actions GitHub des workflows et les paquets npm ont de nouvelles versions. S'il en trouve, il ouvre lui-même une Pull Request (titre du genre « Bump actions/checkout from … to … »). Sans cela, les actions épinglées par empreinte de commit vieilliraient sans que personne ne s'en aperçoive.
+
+**Comment le contrôle de périmètre le traite.** Les PR de Dependabot touchent `.github/` et `package.json`, deux endroits interdits aux personnes extérieures. Le script `check-scope.mjs` exempte donc l'auteur **`dependabot[bot]`**. Deux précautions :
+
+- L'auteur est lu dans `github.event.pull_request.user.login` (**l'auteur de la PR**), et **jamais** dans `github.actor` : ce dernier désigne la personne qui a déclenché l'exécution (par exemple en relançant un contrôle), qui peut être n'importe qui.
+- La comparaison est exacte, et faite par le script de `main`. Un nom d'utilisateur GitHub ne peut pas contenir de crochets : personne ne peut se faire passer pour `dependabot[bot]`.
+
+**Ses PR restent soumises à la revue de propriétaire.** L'exemption ne concerne *que* le contrôle de périmètre. Comme ces PR modifient des fichiers dont vous êtes propriétaire (`.github/`, `package.json`, `package-lock.json`), GitHub exige **votre approbation** pour les fusionner, et les deux contrôles `validate` doivent passer. Bonne nouvelle : l'auteur est le robot, donc vous *pouvez* les approuver (le piège de la section 1 ne s'applique pas).
+
+**Comment les relire :**
+
+1. Regardez **Files changed** : il ne doit y avoir que des changements de version (une empreinte de 40 caractères et son commentaire `# vX.Y.Z` pour une action ; un numéro de version dans `package.json` et `package-lock.json` pour un paquet). Tout autre changement est suspect.
+2. Lisez les « release notes » que Dependabot résume dans la description de la PR (changements notables, alertes de sécurité).
+3. Attendez les deux coches vertes `validate`, puis **Approve** et **Squash and merge**.
+
+**Précisions utiles :**
+
+- Le réglage « Require approval for all outside collaborators » ne concerne pas Dependabot : sa branche est dans ce dépôt, pas dans une copie extérieure. Ses contrôles tournent avec un jeton en lecture seule et sans accès à vos secrets.
+- Dependabot crée lui-même ses étiquettes (par exemple `dependencies`).
+- Pour ne plus recevoir ces PR, supprimez `.github/dependabot.yml` (par une PR).
+
+---
+
+## Deux garde-fous sur le code qui s'exécute
+
+Une Pull Request peut déposer n'importe quel fichier, y compris dans `data/`. Deux règles font que rien de ce qu'elle dépose dans `data/` ne s'exécute :
+
+- **`npm test` ne lance que `scripts/`.** Le script est `node --test "scripts/**/*.test.mjs"`. Un simple `node --test` chercherait des fichiers de test **partout** et exécuterait, par exemple, un `data/evil.test.mjs` déposé par une PR. (`node --test scripts/` ne convient pas non plus : depuis Node 22, il ne parcourt plus les dossiers.) Un test (`scripts/__tests__/data-not-executed.test.mjs`) le prouve : il vérifie qu'un `node --test` nu exécuterait bien ce fichier, et que le script du projet ne l'exécute pas.
+- **`npm run check` passe avant `npm test`** dans `validate.yml`. Il refuse tout fichier qui n'est ni du JSON ni du Markdown dans `data/`. Un `.mjs` déposé là fait échouer la PR avant qu'un seul test ne soit lancé.
+
+Ne changez pas le script `test` sans garder cette limite : le test ci-dessus échouera si vous le faites.
+
+---
+
 ## Comprendre les deux workflows
 
 | Workflow | Quand | Ce qu'il fait |
 |---|---|---|
-| [`validate.yml`](../.github/workflows/validate.yml) | Sur chaque PR, et sur chaque fusion dans `main` | (PR seulement) contrôle de périmètre avec le script de `main`, puis `npm test`, `npm run check` et `npm run format -- --check`. |
+| [`validate.yml`](../.github/workflows/validate.yml) | Sur chaque PR, et sur chaque fusion dans `main` | (PR seulement) contrôle de périmètre avec le script de `main`, puis, avec **Node 24 et Node 22** (deux contrôles), `npm run check`, `npm run format -- --check`, et enfin `npm test`. |
 | [`notify-deploy.yml`](../.github/workflows/notify-deploy.yml) | Sur chaque fusion dans `main`, ou à la main | Prévient l'hébergeur du site, avec le secret `DEPLOY_HOOK_URL`. |
 
 **Le contrôle de périmètre**, en clair : si l'auteur de la PR n'est ni `OWNER`, ni `MEMBER`, ni `COLLABORATOR` du dépôt, la PR échoue dès qu'elle modifie autre chose que `data/`. Le script qui fait ce contrôle est récupéré depuis la branche `main` (dans un dossier à part), et pas depuis la PR : une PR ne peut donc pas le réécrire pour se laisser passer. Il tourne **avant** l'installation des dépendances, donc le code d'une PR hors périmètre n'est même pas exécuté.
@@ -208,4 +252,5 @@ Ajouter un type de lien est **votre décision**, pas celle des contributeurs : t
 - **`validate` échoue sur une PR qui n'a rien de suspect** : ouvrez le journal (clic sur « Details »). Les messages disent quoi corriger. Un contributeur peut reproduire chez lui avec `npm run check`.
 - **Une PR vous semble piégée** (fichiers étranges, scripts, liens symboliques) : ne cliquez pas sur « Approve and run workflows », fermez la PR, et bloquez le compte si besoin.
 - **Le contrôle de périmètre bloque à tort une personne de confiance** : ajoutez-la comme *Collaborator* (Settings > Collaborators). Son statut passe à `COLLABORATOR` et le contrôle ne la limite plus.
+- **Une PR de Dependabot échoue sur une seule version de Node** : la mise à jour ne fonctionne pas avec cette version. Ne la fusionnez pas ; fermez-la ou attendez la suivante.
 - **Le site ne se reconstruit pas après une fusion** : regardez `notify-deploy` dans l'onglet Actions. Sans secret, il ne fait rien ; en échec, vérifiez le secret (section 4).

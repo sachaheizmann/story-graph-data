@@ -11,6 +11,12 @@
 #  4. Les valeurs venues de la Pull Request (titre, nom de branche…) ne sont JAMAIS écrites directement dans
 #     une commande « run » : on les passe par des variables d'environnement.
 #  5. Les actions sont épinglées par empreinte de commit (et non par étiquette, qui peut être déplacée).
+#  6. Dependabot (« dependabot[bot] ») est exempté du contrôle de périmètre : ses PR touchent .github/ et
+#     package.json. On compare l'AUTEUR de la PR (github.event.pull_request.user.login), jamais github.actor
+#     (qui désigne la personne ayant déclenché l'exécution, par exemple en relançant un contrôle). Ses PR
+#     restent soumises à la revue de propriétaire (CODEOWNERS) : l'exemption ne lui donne aucun droit de fusion.
+#  7. « npm run check » passe AVANT « npm test », et « npm test » ne lance que les fichiers de scripts/ :
+#     un fichier déposé dans data/ (par exemple data/evil.test.mjs) n'est jamais exécuté.
 name: validate
 
 on:
@@ -28,11 +34,16 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # Le nom de ce job est « validate » : c'est le contrôle à rendre obligatoire dans la protection de main.
+  # Une ligne de la matrice = un contrôle. GitHub les nomme « validate (Node 24) » et « validate (Node 22) » :
+  # les DEUX sont à rendre obligatoires dans la protection de main, après le premier lancement (voir docs/MAINTAINER.md).
   validate:
-    name: validate
+    name: validate (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false # si une version échoue, l'autre va quand même au bout : on voit tout d'un coup
+      matrix:
+        node: [24, 22] # versions prises en charge (voir « engines » dans package.json)
     defaults:
       run:
         working-directory: pr
@@ -58,6 +69,7 @@ jobs:
         shell: bash
         env:
           AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
+          AUTHOR_LOGIN: ${{ github.event.pull_request.user.login }}
         run: |
           git rev-parse --verify --quiet HEAD^2 > /dev/null || { echo "::error title=Contrôle de périmètre::Le commit testé n'est pas la fusion attendue de la Pull Request."; exit 1; }
           git diff --name-only --no-renames -z HEAD^1 HEAD | node ../trusted/scripts/check-scope.mjs
@@ -65,18 +77,21 @@ jobs:
       - name: Installer Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 20 # version minimale prise en charge (voir « engines » dans package.json)
+          node-version: ${{ matrix.node }}
           cache: npm
           cache-dependency-path: pr/package-lock.json
 
       - name: Installer les dépendances (sans exécuter de scripts d'installation)
         run: npm ci --ignore-scripts
 
-      - name: Tests des scripts
-        run: npm test
-
+      # Les contrôles des données passent AVANT les tests : « npm run check » refuse tout fichier inattendu dans
+      # data/ (un .mjs, par exemple) avant que le moindre test ne soit lancé.
       - name: Contrôle des données
         run: npm run check
 
       - name: Contrôle du format
         run: npm run format -- --check
+
+      # « npm test » ne lance que scripts/**/*.test.mjs : rien de ce qui se trouve dans data/ n'est exécuté.
+      - name: Tests des scripts
+        run: npm test

@@ -4,6 +4,11 @@
 // que le dossier data/. Les dossiers schema/, scripts/, .github/, docs/ et les fichiers de la racine
 // définissent les règles et l'automatisation : ils ne sont modifiés que par le mainteneur.
 //
+// Exception : Dependabot (« dependabot[bot] »). Ses Pull Requests de mise à jour touchent .github/ et
+// package.json. On le reconnaît à l'AUTEUR de la PR (github.event.pull_request.user.login), jamais à
+// github.actor. Un nom d'utilisateur GitHub ne peut pas contenir de crochets : personne ne peut se faire
+// passer pour ce compte. Ses PR restent soumises à la revue de propriétaire (CODEOWNERS).
+//
 // La vraie protection est le réglage GitHub « Require review from Code Owners » (voir docs/MAINTAINER.md) :
 // ce script peut être contourné par une PR qui modifierait le workflow lui-même.
 //
@@ -11,7 +16,8 @@
 //   git diff --name-only --no-renames -z HEAD^1 HEAD | node check-scope.mjs
 // La liste des fichiers arrive sur l'entrée standard, séparée par des caractères NUL (les noms de fichiers
 // peuvent contenir des espaces ou des retours à la ligne). Le statut de l'auteur vient de la variable
-// d'environnement AUTHOR_ASSOCIATION (ou de l'option --association).
+// d'environnement AUTHOR_ASSOCIATION (ou de l'option --association), son nom d'utilisateur de AUTHOR_LOGIN
+// (ou de l'option --login).
 //
 // Ce fichier n'importe rien d'autre que Node : c'est voulu, pour qu'il reste simple à relire et à isoler.
 import { readFileSync } from 'node:fs';
@@ -21,6 +27,9 @@ import { parseArgs } from 'node:util';
 
 /** Statuts GitHub (« author_association ») qui peuvent modifier n'importe quel fichier. */
 export const TRUSTED_ASSOCIATIONS = ['OWNER', 'MEMBER', 'COLLABORATOR'];
+
+/** Comptes automatiques exemptés du contrôle de périmètre (comparaison exacte avec l'auteur de la PR). */
+export const EXEMPT_LOGINS = ['dependabot[bot]'];
 
 /** Les seuls chemins que les autres personnes peuvent modifier. */
 export const ALLOWED_PREFIX = 'data/';
@@ -37,13 +46,15 @@ export function isInScope(file) {
 }
 
 /**
- * @param {{files: string[], association?: string}} input  fichiers modifiés (anciens ET nouveaux chemins) et statut de l'auteur
- * @returns {{ok: boolean, trusted: boolean, outOfScope: string[]}}
+ * @param {{files: string[], association?: string, login?: string}} input
+ *        fichiers modifiés (anciens ET nouveaux chemins), statut et nom d'utilisateur de l'auteur de la PR
+ * @returns {{ok: boolean, trusted: boolean, exempt: boolean, outOfScope: string[]}}
  */
-export function checkScope({ files, association }) {
+export function checkScope({ files, association, login }) {
   const trusted = TRUSTED_ASSOCIATIONS.includes(association); // comparaison exacte : tout ce qui est inconnu est « non fiable »
-  const outOfScope = trusted ? [] : files.filter((file) => !isInScope(file));
-  return { ok: outOfScope.length === 0, trusted, outOfScope };
+  const exempt = !trusted && EXEMPT_LOGINS.includes(login); // idem : « dependabot[bot] » exactement
+  const outOfScope = trusted || exempt ? [] : files.filter((file) => !isInScope(file));
+  return { ok: outOfScope.length === 0, trusted, exempt, outOfScope };
 }
 
 /** Un texte sur une seule ligne : un nom de fichier ne doit pas pouvoir injecter une commande « :: » dans les logs. */
@@ -52,9 +63,9 @@ const oneLine = (text) => String(text).replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, ' ');
 function main() {
   let values;
   try {
-    ({ values } = parseArgs({ options: { association: { type: 'string' } }, strict: true }));
+    ({ values } = parseArgs({ options: { association: { type: 'string' }, login: { type: 'string' } }, strict: true }));
   } catch (error) {
-    console.error(`Options non comprises (${error.message}).\nUsage : git diff --name-only --no-renames -z HEAD^1 HEAD | node check-scope.mjs [--association OWNER]`);
+    console.error(`Options non comprises (${error.message}).\nUsage : git diff --name-only --no-renames -z HEAD^1 HEAD | node check-scope.mjs [--association OWNER] [--login pseudo]`);
     return 2;
   }
   if (process.stdin.isTTY) {
@@ -63,11 +74,16 @@ function main() {
   }
 
   const association = values.association ?? process.env.AUTHOR_ASSOCIATION;
+  const login = values.login ?? process.env.AUTHOR_LOGIN;
   const files = parseFileList(readFileSync(0, 'utf8'));
-  const result = checkScope({ files, association });
+  const result = checkScope({ files, association, login });
 
   if (result.trusted) {
     console.log(`✓ Auteur de confiance (${association}) : pas de restriction de périmètre (${files.length} fichier${files.length > 1 ? 's' : ''} modifié${files.length > 1 ? 's' : ''}).`);
+    return 0;
+  }
+  if (result.exempt) {
+    console.log(`✓ Auteur exempté du contrôle de périmètre (${oneLine(login)}) : ${files.length} fichier${files.length > 1 ? 's' : ''} modifié${files.length > 1 ? 's' : ''}. Cette PR touche des fichiers protégés : elle reste soumise à la revue de propriétaire (Code Owners).`);
     return 0;
   }
   if (result.ok) {

@@ -50,8 +50,21 @@ test('validate : jeton en lecture seule (aucune permission d\'écriture)', () =>
   assert.doesNotMatch(codeLines(validate).join('\n'), /: write\b/);
 });
 
-test('validate : le job s\'appelle « validate » (nom du contrôle à rendre obligatoire)', () => {
-  assert.match(validate, /^ {2}validate:\n {4}name: validate$/m);
+test('validate : le job a un nom explicite avec la version de Node : « validate (Node ${{ matrix.node }}) »', () => {
+  assert.match(validate, /^ {2}validate:\n(?: {4}#.*\n)* {4}name: validate \(Node \$\{\{ matrix\.node \}\}\)$/m);
+});
+
+test('validate : la matrice teste Node 24 et Node 22, sans arrêter l\'une si l\'autre échoue', () => {
+  assert.match(validate, /^ {4}strategy:\n {6}fail-fast: false.*\n {6}matrix:\n {8}node: \[24, 22\]/m);
+  assert.match(validate, /node-version: \$\{\{ matrix\.node \}\}/);
+});
+
+test('validate : la plus ancienne version testée est celle demandée par « engines » de package.json', () => {
+  const engines = JSON.parse(readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8')).engines.node;
+  assert.equal(engines, '>=22');
+  const versions = validate.match(/node: \[([\d, ]+)\]/)[1].split(',').map(Number);
+  assert.equal(Math.min(...versions), 22);
+  assert.deepEqual(versions.sort(), [22, 24]);
 });
 
 test('validate : toutes les actions sont épinglées par une empreinte de commit de 40 caractères', () => {
@@ -74,6 +87,21 @@ test('validate : le contrôle de périmètre vient d\'une copie de main récupé
   assert.match(scope.script, /node \.\.\/trusted\/scripts\/check-scope\.mjs/);
   assert.doesNotMatch(scope.script, /node (\.\/)?(pr\/)?scripts\/check-scope/, 'jamais la copie de la PR');
   assert.match(scope.script, /git diff --name-only --no-renames -z HEAD\^1 HEAD/, 'les renommages comptent comme une modification de l\'ancien chemin');
+});
+
+test('validate : « npm run check » passe AVANT « npm test » (et le format aussi)', () => {
+  const scripts = runBlocks(validate).map((b) => b.script);
+  const at = (script) => scripts.indexOf(script);
+  assert.ok(at('npm run check') >= 0 && at('npm test') > at('npm run check'), scripts.join(' | '));
+  assert.ok(at('npm run format -- --check') > at('npm run check') && at('npm run format -- --check') < at('npm test'));
+  assert.ok(at('npm ci --ignore-scripts') < at('npm run check'));
+});
+
+test('validate : Dependabot est reconnu par l\'AUTEUR de la PR (pull_request.user.login), jamais par github.actor', () => {
+  const code = codeLines(validate).join('\n');
+  assert.match(code, /AUTHOR_LOGIN: \$\{\{ github\.event\.pull_request\.user\.login \}\}/);
+  assert.doesNotMatch(code, /github\.actor|triggering_actor/);
+  assert.doesNotMatch(code, /dependabot/i, 'le nom n\'est pas comparé dans le workflow (modifiable par une PR) mais par le script de main');
 });
 
 test('validate : le contrôle de périmètre passe AVANT l\'installation des dépendances', () => {

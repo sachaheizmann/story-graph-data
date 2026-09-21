@@ -14,10 +14,10 @@
   "license": "SEE LICENSE IN LICENSE-SCRIPTS",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
-    "test": "node --test",
+    "test": "node --test \"scripts/**/*.test.mjs\"",
     "check": "node scripts/check.mjs",
     "format": "node scripts/format.mjs",
     "coverage": "node scripts/coverage.mjs",

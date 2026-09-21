@@ -1,0 +1,18 @@
+# Dependabot ouvre tout seul des Pull Requests pour mettre à jour ce dont le projet dépend, une fois par semaine.
+# Deux familles : les actions GitHub des workflows (épinglées par empreinte de commit) et les paquets npm.
+#
+# Ses PR touchent .github/ et package.json : elles restent soumises à la revue de propriétaire (CODEOWNERS), donc à
+# votre approbation. Voir docs/MAINTAINER.md, section « Dependabot ».
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday

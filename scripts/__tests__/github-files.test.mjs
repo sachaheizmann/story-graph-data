@@ -72,6 +72,18 @@ test('modèle « spoiler » : demande l\'élément, la position de lecture et ce
   assert.match(text, /Cette issue est publique/);
 });
 
+// ------------------------------------------------------------------ Dependabot
+test('dependabot.yml : met à jour les actions GitHub et les paquets npm, chaque semaine', () => {
+  const text = read('.github', 'dependabot.yml');
+  assert.match(text, /^version: 2$/m);
+  const blocks = text.split(/^ {2}- package-ecosystem: /m).slice(1);
+  assert.deepEqual(blocks.map((b) => b.split('\n')[0]).sort(), ['github-actions', 'npm']);
+  for (const block of blocks) {
+    assert.match(block, /^ {4}directory: \/$/m);
+    assert.match(block, /^ {6}interval: weekly$/m);
+  }
+});
+
 // ------------------------------------------------------------------ guide du mainteneur
 const guide = read('docs', 'MAINTAINER.md');
 
@@ -126,4 +138,28 @@ test('MAINTAINER.md : les adresses GitHub utilisent le vrai dépôt', () => {
   const urls = [...guide.matchAll(/https:\/\/github\.com\/[^\s)]+/g)].map((m) => m[0]);
   assert.ok(urls.length > 5);
   for (const url of urls) assert.match(url, /^https:\/\/github\.com\/sachaheizmann\/story-graph-data(\/|$)/, url);
+});
+
+test('MAINTAINER.md : la protection de main se règle APRÈS le premier lancement, avec LES DEUX contrôles obligatoires', () => {
+  assert.match(guide, /réglez la protection de `main` APRÈS le premier lancement de `validate`/);
+  assert.match(guide, /\*\*`validate \(Node 24\)`\*\* et \*\*`validate \(Node 22\)`\*\*/);
+  assert.match(guide, /Rendez-les tous les deux obligatoires/);
+  assert.match(guide, /Faites cette étape APRÈS le premier lancement de `validate`/);
+  const flagged = read('.github', 'workflows', 'validate.yml');
+  assert.match(flagged, /name: validate \(Node \$\{\{ matrix\.node \}\}\)/, 'les noms cités dans le guide sont ceux du workflow');
+});
+
+test('MAINTAINER.md : section Dependabot (auteur de la PR et non github.actor, revue de propriétaire maintenue)', () => {
+  assert.match(guide, /^## Dependabot, les mises à jour automatiques$/m);
+  assert.match(guide, /`github\.event\.pull_request\.user\.login`.*l'auteur de la PR/);
+  assert.match(guide, /jamais\*\* dans `github\.actor`/);
+  assert.match(guide, /Ses PR restent soumises à la revue de propriétaire/);
+  assert.match(guide, /GitHub exige \*\*votre approbation\*\*/);
+});
+
+test('MAINTAINER.md : explique pourquoi npm test est limité à scripts/ (data/evil.test.mjs) et l\'ordre check puis test', () => {
+  assert.match(guide, /^## Deux garde-fous sur le code qui s'exécute$/m);
+  assert.match(guide, /node --test \"scripts\/\*\*\/\*\.test\.mjs\"/);
+  assert.match(guide, /data\/evil\.test\.mjs/);
+  assert.match(guide, /`npm run check` passe avant `npm test`/);
 });
