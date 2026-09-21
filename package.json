@@ -23,7 +23,8 @@
     "coverage": "node scripts/coverage.mjs",
     "new-character": "node scripts/new-character.mjs",
     "new-note": "node scripts/new-note.mjs",
-    "new-edition": "node scripts/new-edition.mjs"
+    "new-edition": "node scripts/new-edition.mjs",
+    "privacy:history": "node scripts/privacy-history.mjs"
   },
   "dependencies": {
     "ajv": "^8.20.0"

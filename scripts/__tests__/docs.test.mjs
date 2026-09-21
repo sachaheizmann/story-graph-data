@@ -110,9 +110,9 @@ test('CONTRIBUTING : droit d\'auteur (faits, propres mots, 600 caractères) et r
 // ------------------------------------------------------------------ commandes citées
 test('toutes les commandes « npm run <nom> » citées dans la documentation existent dans package.json', () => {
   for (const [file, text] of Object.entries(DOCS)) {
-    for (const [, name] of text.matchAll(/npm run ([a-z][a-z-]*)/g)) assert.ok(name in pkg.scripts, `${file} cite « npm run ${name} », qui n'existe pas`);
+    for (const [, name] of text.matchAll(/npm run ([a-z][a-z:-]*)/g)) assert.ok(name in pkg.scripts, `${file} cite « npm run ${name} », qui n'existe pas`);
   }
-  for (const name of ['check', 'format', 'coverage', 'new-character', 'new-note', 'new-edition', 'test']) assert.ok(name in pkg.scripts, name);
+  for (const name of ['check', 'format', 'coverage', 'new-character', 'new-note', 'new-edition', 'test', 'privacy:history']) assert.ok(name in pkg.scripts, name);
 });
 
 // ------------------------------------------------------------------ liens et ancres

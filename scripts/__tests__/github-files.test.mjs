@@ -163,3 +163,11 @@ test('MAINTAINER.md : explique pourquoi npm test est limité à scripts/ (data/e
   assert.match(guide, /data\/evil\.test\.mjs/);
   assert.match(guide, /`npm run check` passe avant `npm test`/);
 });
+
+test('MAINTAINER.md : demande de lancer « npm run privacy:history » avant le premier envoi, et explique pourquoi ce n\'est pas dans npm test', () => {
+  assert.match(guide, /Avant le tout premier envoi de code vers GitHub, lancez `npm run privacy:history`/);
+  assert.match(guide, /y compris ce qui a été supprimé depuis/);
+  assert.match(guide, /volontairement \*\*pas\*\* dans `npm test`/);
+  assert.match(guide, /git log --format='%an <%ae>' \| sort -u/);
+  assert.ok(guide.indexOf('npm run privacy:history') < guide.indexOf('Ordre important'), 'avant la liste de mise en route');
+});

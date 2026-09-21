@@ -18,6 +18,10 @@ Il y a donc deux couches :
 
 ## Liste de mise en route (à faire une seule fois)
 
+> **Avant le tout premier envoi de code vers GitHub, lancez `npm run privacy:history`.**
+> Tout ce qui est envoyé sur un dépôt public devient public, **y compris ce qui a été supprimé depuis** : l'historique de git garde tout. Cette commande cherche, dans les commits (auteur, validateur, messages), dans tout ce qui a un jour été écrit dans un fichier, dans les noms de branches et dans les fichiers actuels, une **adresse e-mail personnelle** ou un **chemin de votre ordinateur**, et vérifie l'adresse que git utilisera pour vos prochains commits. Seules les adresses « noreply » et les adresses d'exemple sont admises.
+> Elle n'est volontairement **pas** dans `npm test` : les contributeurs signent leurs commits avec leur vrai e-mail, et une Pull Request est fusionnée sous le nom de son auteur. C'est à vous de la lancer. Vérifiez aussi les identités qu'elle affiche (les **noms** seront publics) avec `git log --format='%an <%ae>' | sort -u`.
+
 À faire dans cet ordre, **après** avoir créé le dépôt sur GitHub et y avoir envoyé le code :
 
 > **Ordre important : réglez la protection de `main` APRÈS le premier lancement de `validate`, pas avant.**
