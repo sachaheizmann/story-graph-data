@@ -106,15 +106,18 @@ test('MAINTAINER.md : dit que la vraie protection est Code Owners et que le cont
   assert.match(guide, /Le contrôle de périmètre automatique n'est qu'une \*\*aide\*\*/);
 });
 
-test('MAINTAINER.md : décrit « Require approval for all outside collaborators » et le secret DEPLOY_HOOK_URL', () => {
-  assert.match(guide, /\*\*Require approval for all outside collaborators\*\*/);
+test('MAINTAINER.md : décrit « Require approval for all external contributors » (libellé exact) et le secret DEPLOY_HOOK_URL', () => {
+  assert.match(guide, /\*\*Require approval for all external contributors\*\*/);
   assert.match(guide, /Name\*\* : `DEPLOY_HOOK_URL`/);
   assert.match(guide, /jamais affichée dans les journaux/);
 });
 
-test('MAINTAINER.md : signale le piège du mainteneur seul (on ne peut pas approuver sa propre PR)', () => {
+test('MAINTAINER.md : signale le piège du mainteneur seul et le contournement « For pull requests only »', () => {
   assert.match(guide, /interdit d'approuver sa propre Pull Request/);
-  assert.match(guide, /\*\*décochée\*\* la case \*\*Do not allow bypassing the above settings\*\*/);
+  assert.match(guide, /\*\*Bypass list\*\*, cliquez \*\*Add bypass\*\*/);
+  assert.match(guide, /choisissez \*\*For pull requests only\*\*/);
+  assert.match(guide, /vous ne pouvez \*\*pas pousser directement\*\* sur `main`/);
+  assert.match(guide, /Ne choisissez pas « Always allow »/);
 });
 
 test('MAINTAINER.md : explique comment relire une PR et ajouter un type de lien (avec reverse_label)', () => {
@@ -170,4 +173,55 @@ test('MAINTAINER.md : demande de lancer « npm run privacy:history » avant le p
   assert.match(guide, /volontairement \*\*pas\*\* dans `npm test`/);
   assert.match(guide, /git log --format='%an <%ae>' \| sort -u/);
   assert.ok(guide.indexOf('npm run privacy:history') < guide.indexOf('Ordre important'), 'avant la liste de mise en route');
+});
+
+// ------------------------------------------------------------------ le ruleset et les libellés exacts (vérifiés dans la doc officielle de GitHub)
+test('MAINTAINER.md : précise que le projet utilise un ruleset (protect-main) et non la protection de branche classique', () => {
+  assert.match(guide, /Ce projet utilise un « ruleset » nommé `protect-main`, et non la protection de branche classique/);
+  assert.match(guide, /si vous cherchez « Branch protection rules » dans les réglages, vous n'y trouverez rien/);
+  assert.match(guide, /^## 2\. Le reste du ruleset `protect-main`$/m);
+  assert.match(guide, /^### Si vous connaissez la protection de branche classique$/m);
+});
+
+test('MAINTAINER.md : les étapes de création du ruleset suivent l\'interface décrite par GitHub', () => {
+  for (const label of ['Settings > Rules > Rulesets', '**New ruleset**', '**New branch ruleset**', '**Ruleset name**', '**Enforcement status**', '**Active**', '**Target branches**', '**Add a target**']) {
+    assert.ok(guide.includes(label), label);
+  }
+  assert.match(guide, /settings\/rules\)/);
+});
+
+test('MAINTAINER.md : les intitulés des règles du ruleset sont ceux de GitHub', () => {
+  for (const label of ['Require a pull request before merging', 'Required approvals', 'Dismiss stale pull request approvals when new commits are pushed',
+    'Require review from Code Owners', 'Require conversation resolution before merging', 'Require status checks to pass before merging',
+    'Restrict deletions', 'Block force pushes', 'Allowed merge methods']) {
+    assert.ok(guide.includes(`**${label}**`), label);
+  }
+});
+
+test('MAINTAINER.md : le réglage Actions porte son intitulé exact, et l\'ancien libellé n\'apparaît plus nulle part', () => {
+  assert.match(guide, /\*\*Approval for running fork pull request workflows from contributors\*\*/);
+  assert.match(guide, /Require approval for first-time contributors who are new to GitHub/);
+  assert.match(guide, /correction anodine/);
+  for (const file of ['README.md', 'CONTRIBUTING.md', 'docs/MAINTAINER.md', '.github/PULL_REQUEST_TEMPLATE.md']) {
+    assert.doesNotMatch(read(...file.split('/')), /outside collaborators?/i, `${file} : ancien libellé`);
+  }
+});
+
+test('MAINTAINER.md : les commandes et valeurs de vérification en lecture seule correspondent aux réglages attendus', () => {
+  for (const command of ['gh api repos/sachaheizmann/story-graph-data/rulesets', 'actions/permissions/fork-pr-contributor-approval',
+    'actions/permissions/workflow', "codeowners/errors --jq '.errors | length'"]) {
+    assert.ok(guide.includes(command), command);
+  }
+  for (const [field, value] of [['enforcement', '`active`'], ['bypass_actors[].bypass_mode', '`pull_request`'], ['required_approving_review_count', '`1`'],
+    ['require_code_owner_review', '`true`'], ['dismiss_stale_reviews_on_push', '`true`'], ['required_review_thread_resolution', '`true`'],
+    ['approval_policy', '`all_external_contributors`'], ['default_workflow_permissions', '`read`'], ['can_approve_pull_request_reviews', '`false`']]) {
+    assert.match(guide, new RegExp(`\\\`${field.replace(/[[\]]/g, '\\$&')}\\\`.*${value.replace(/`/g, '\\`')}`), `${field} → ${value}`);
+  }
+  assert.match(guide, /validate \(Node 24\)` et `validate \(Node 22\)` \|/);
+});
+
+test('MAINTAINER.md : le test B et le test C décrivent ce que l\'on doit voir avec le ruleset', () => {
+  assert.match(guide, /Vous fusionnez grâce au contournement « For pull requests only »/);
+  assert.match(guide, /GitHub ne réclame \*\*pas\*\* de relecture de propriétaire : `data\/` n'a pas de propriétaire/);
+  assert.match(guide, /Cette Pull Request modifie des fichiers en dehors de data\//);
 });
