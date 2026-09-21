@@ -8,17 +8,20 @@
   "friend": {
     "label": "is a friend of"
   },
+  "master_of": {
+    "label": "is the master of",
+    "reverse_label": "is the servant of"
+  },
   "mentor_of": {
-    "label": "is the mentor of"
+    "label": "is the mentor of",
+    "reverse_label": "is mentored by"
   },
   "parent_of": {
-    "label": "is the parent of"
+    "label": "is the parent of",
+    "reverse_label": "is the child of"
   },
   "rival": {
     "label": "is a rival of"
-  },
-  "servant_of": {
-    "label": "is the master of"
   },
   "sibling_of": {
     "label": "is a sibling of"

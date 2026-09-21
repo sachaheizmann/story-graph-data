@@ -11,6 +11,10 @@
     "category": "social",
     "directed": false
   },
+  "master_of": {
+    "category": "social",
+    "directed": true
+  },
   "mentor_of": {
     "category": "social",
     "directed": true
@@ -22,10 +26,6 @@
   "rival": {
     "category": "social",
     "directed": false
-  },
-  "servant_of": {
-    "category": "social",
-    "directed": true
   },
   "sibling_of": {
     "category": "family",

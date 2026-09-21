@@ -64,7 +64,7 @@ const samples = {
     ko: { ally: { category: 'magic', directed: false } },
   },
   'relation-types-text': {
-    ok: { ally: { label: 'est allié(e) avec' } },
+    ok: { ally: { label: 'est allié(e) avec' }, parent_of: { label: 'est le parent de', reverse_label: 'a pour parent' } },
     ko: { ally: {} },
   },
 };
@@ -91,6 +91,12 @@ test('relation : le type peut contenir un underscore (parent_of) mais pas de maj
   const base = { id: 'a-b-parent-1', from: 'a', to: 'b', start };
   assert.equal(validate({ ...base, type: 'parent_of' }), true, JSON.stringify(validate.errors));
   assert.equal(validate({ ...base, type: 'Parent_Of' }), false);
+});
+
+test('libellés de types : « reverse_label » doit être un texte non vide', () => {
+  const validate = getValidator(ajv, 'relation-types-text');
+  assert.equal(validate({ parent_of: { label: 'est le parent de', reverse_label: '  ' } }), false);
+  assert.equal(validate({ parent_of: { label: 'est le parent de', reverse_label: 42 } }), false);
 });
 
 test('position « end » accepte null mais refuse une chaîne', () => {

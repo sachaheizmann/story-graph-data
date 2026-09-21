@@ -1,1 +1,1 @@
-Since they first met, Kael has been reporting Aria's movements to Vaelor. His loyalty to her was only a front.
+Since they first met, Kael has been reporting Aria's movements to Vaelor. His loyalty to her was only a front. Yet, face to face with her, he cannot bring himself to strike, and nobody understands why.

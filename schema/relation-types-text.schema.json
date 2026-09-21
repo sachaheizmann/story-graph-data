@@ -16,6 +16,13 @@
         "type": "string",
         "maxLength": 80,
         "x-message": "« label » se lit entre les deux personnages, par exemple « est le parent de » (80 caractères au plus)."
+      },
+      "reverse_label": {
+        "description": "Libellé inverse, pour afficher le lien du point de vue de l'AUTRE personnage : « <to> <libellé inverse> <from> », par exemple « a pour parent ». Obligatoire, dans la langue source d'une édition, pour les types orientés ; interdit pour les types non orientés.",
+        "type": "string",
+        "$ref": "common.schema.json#/$defs/text",
+        "maxLength": 80,
+        "x-message": "« reverse_label » se lit du point de vue de l'autre personnage, par exemple « a pour parent » (80 caractères au plus)."
       }
     }
   }

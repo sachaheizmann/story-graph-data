@@ -171,10 +171,10 @@
     "end": null
   },
   {
-    "id": "vaelor-kael-servant-1",
+    "id": "vaelor-kael-master-1",
     "from": "vaelor",
     "to": "kael",
-    "type": "servant_of",
+    "type": "master_of",
     "start": {
       "book": "tome-1",
       "chapter": 9
