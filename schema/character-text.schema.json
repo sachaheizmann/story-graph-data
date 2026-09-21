@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "character-text.schema.json",
+  "title": "Personnage, texte (text/<langue>/characters/<id>.json)",
+  "description": "RÈGLE « révélé ≠ vrai » : la description ne contient QUE ce que le lecteur sait au « start » du personnage. Tout ce qui est appris plus tard va dans des notes.",
+  "type": "object",
+  "required": ["name", "description"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "$ref": "common.schema.json#/$defs/text",
+      "type": "string",
+      "maxLength": 100,
+      "x-message": "« name » est le nom du personnage (100 caractères au plus)."
+    },
+    "aliases": {
+      "description": "Surnoms et autres noms. Attention : un surnom appris plus tard est un spoiler, mettez-le dans une note.",
+      "type": "array",
+      "maxItems": 10,
+      "uniqueItems": true,
+      "items": { "type": "string", "$ref": "common.schema.json#/$defs/text", "maxLength": 100 },
+      "x-message": "« aliases » est une liste de 10 surnoms au plus (textes non vides, sans doublon)."
+    },
+    "description": {
+      "description": "Courte description, écrite avec vos propres mots, limitée à ce qui est connu au « start ».",
+      "$ref": "common.schema.json#/$defs/text",
+      "type": "string",
+      "maxLength": 600,
+      "x-message": "« description » est courte (600 caractères au plus), écrite avec vos propres mots, et ne dit rien de ce que le lecteur apprend APRÈS le « start » du personnage (mettez-le dans une note)."
+    }
+  }
+}

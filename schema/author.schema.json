@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "author.schema.json",
+  "title": "Auteur d'un livre (data/authors/<id>.json)",
+  "type": "object",
+  "required": ["id"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "born": {
+      "description": "Année de naissance (optionnel).",
+      "type": "integer",
+      "minimum": 1000,
+      "maximum": 2100,
+      "x-message": "« born » est une année entière (exemple : 1975)."
+    }
+  }
+}

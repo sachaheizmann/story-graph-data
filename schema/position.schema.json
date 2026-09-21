@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "position.schema.json",
+  "title": "Position de lecture",
+  "description": "Un point précis de la lecture : un tome (de cette édition) et un chapitre. RÈGLE « révélé ≠ vrai » : une position est TOUJOURS le moment où le lecteur l'apprend, jamais le moment où c'est vrai dans l'histoire.",
+  "type": "object",
+  "required": ["book", "chapter"],
+  "additionalProperties": false,
+  "properties": {
+    "book": {
+      "description": "Identifiant d'un tome listé dans « books » de l'édition.",
+      "$ref": "common.schema.json#/$defs/id",
+      "x-message": "« book » doit être l'identifiant d'un tome de l'édition (exemple : « tome-1 »)."
+    },
+    "chapter": {
+      "description": "Numéro de chapitre, de 1 jusqu'au nombre de chapitres du tome.",
+      "type": "integer",
+      "minimum": 1,
+      "x-message": "« chapter » est un numéro de chapitre entier, à partir de 1 (exemple : 12)."
+    }
+  },
+  "$defs": {
+    "orNull": {
+      "description": "Une position, ou null quand il n'y a pas de fin.",
+      "type": ["object", "null"],
+      "required": ["book", "chapter"],
+      "additionalProperties": false,
+      "properties": {
+        "book": { "$ref": "#/properties/book" },
+        "chapter": { "$ref": "#/properties/chapter" }
+      },
+      "x-message": "« end » vaut null (pas de fin) ou une position { \"book\": \"tome-1\", \"chapter\": 12 }."
+    }
+  }
+}

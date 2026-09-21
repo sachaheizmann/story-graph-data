@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "relation-types-text.schema.json",
+  "title": "Libellés des types de liens (data/_common/text/<langue>/relation-types.json)",
+  "type": "object",
+  "minProperties": 1,
+  "propertyNames": { "pattern": "^[a-z]+(_[a-z]+)*$" },
+  "additionalProperties": {
+    "type": "object",
+    "required": ["label"],
+    "additionalProperties": false,
+    "properties": {
+      "label": {
+        "description": "Libellé qui se lit « <from> <libellé> <to> », par exemple « est le parent de ».",
+        "$ref": "common.schema.json#/$defs/text",
+        "type": "string",
+        "maxLength": 80,
+        "x-message": "« label » se lit entre les deux personnages, par exemple « est le parent de » (80 caractères au plus)."
+      }
+    }
+  }
+}

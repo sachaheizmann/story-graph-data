@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "saga-text.schema.json",
+  "title": "Texte d'une saga (data/<saga>/text/<langue>/saga.json)",
+  "type": "object",
+  "required": ["title", "description"],
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "$ref": "common.schema.json#/$defs/text",
+      "type": "string",
+      "maxLength": 150,
+      "x-message": "« title » est le titre de la saga (150 caractères au plus)."
+    },
+    "description": {
+      "description": "Présentation courte, SANS spoiler.",
+      "$ref": "common.schema.json#/$defs/text",
+      "type": "string",
+      "maxLength": 600,
+      "x-message": "« description » présente la saga en 600 caractères au plus, sans aucun spoiler."
+    }
+  }
+}

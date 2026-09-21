@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "common.schema.json",
+  "title": "Définitions communes",
+  "description": "Briques réutilisées par les autres schémas (identifiants, pseudo GitHub, langue, texte).",
+  "$defs": {
+    "id": {
+      "description": "Identifiant stable : minuscules, chiffres et tirets. Ne change jamais d'une langue ou d'une édition à l'autre.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "x-message": "Un identifiant contient uniquement des minuscules sans accent, des chiffres et des tirets, sans tiret au début, à la fin ou doublé (exemple : « aria », « val-sombre »)."
+    },
+    "noteId": {
+      "description": "Identifiant aléatoire d'une note, généré par « npm run new-note » pour éviter les collisions entre Pull Requests.",
+      "type": "string",
+      "pattern": "^n-[a-z0-9]{5,8}$",
+      "x-message": "L'identifiant d'une note ressemble à « n-7k2p9 ». Ne l'inventez pas : générez-le avec « npm run new-note »."
+    },
+    "githubUser": {
+      "description": "Nom d'utilisateur GitHub (jamais une adresse e-mail).",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 39,
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$",
+      "x-message": "Indiquez un nom d'utilisateur GitHub (lettres, chiffres, tirets), jamais une adresse e-mail."
+    },
+    "language": {
+      "description": "Code de langue court, en minuscules (fr, en, es, pt…).",
+      "type": "string",
+      "pattern": "^[a-z]{2,3}$",
+      "x-message": "Une langue s'écrit avec un code court en minuscules, par exemple « fr » ou « en »."
+    },
+    "text": {
+      "description": "Texte non vide (pas uniquement des espaces).",
+      "type": "string",
+      "pattern": "\\S",
+      "x-message": "Ce texte ne peut pas être vide."
+    }
+  }
+}

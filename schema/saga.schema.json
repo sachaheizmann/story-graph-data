@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "saga.schema.json",
+  "title": "Saga (data/<saga>/saga.json)",
+  "type": "object",
+  "required": ["schemaVersion", "id", "authors", "defaultEdition"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "description": "Version du format de données.",
+      "const": 1,
+      "x-message": "« schemaVersion » doit valoir 1."
+    },
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "demo": {
+      "description": "Saga de démonstration (le site affichera un bandeau).",
+      "type": "boolean"
+    },
+    "authors": {
+      "description": "Identifiants des auteurs du livre (fiches dans data/authors/).",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "common.schema.json#/$defs/id" },
+      "x-message": "« authors » liste au moins un identifiant d'auteur, sans doublon."
+    },
+    "defaultEdition": {
+      "description": "Édition affichée par défaut (identifiant d'un dossier de editions/).",
+      "$ref": "common.schema.json#/$defs/id"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "relation-types.schema.json",
+  "title": "Types de liens (data/_common/relation-types.json)",
+  "description": "Ajouter un type est une décision du mainteneur (voir docs/MAINTAINER.md).",
+  "type": "object",
+  "minProperties": 1,
+  "propertyNames": { "pattern": "^[a-z]+(_[a-z]+)*$" },
+  "additionalProperties": {
+    "type": "object",
+    "required": ["category", "directed"],
+    "additionalProperties": false,
+    "properties": {
+      "category": {
+        "enum": ["family", "social"],
+        "x-message": "« category » vaut « family » ou « social »."
+      },
+      "directed": {
+        "description": "true : « from » et « to » ne sont pas interchangeables (parent, mentor, maître). false : le lien est symétrique.",
+        "type": "boolean"
+      }
+    }
+  }
+}

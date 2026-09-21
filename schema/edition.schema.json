@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "edition.schema.json",
+  "title": "Édition (data/<saga>/editions/<edition>/edition.json)",
+  "description": "Une édition est une copie complète et indépendante : ses chapitres sont découpés à sa façon.",
+  "type": "object",
+  "required": ["id", "language", "publisher", "year", "based_on", "created_by", "books"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "language": {
+      "description": "Langue SOURCE de l'édition : ses personnages et ses notes doivent avoir un texte dans cette langue.",
+      "$ref": "common.schema.json#/$defs/language"
+    },
+    "publisher": {
+      "$ref": "common.schema.json#/$defs/text",
+      "type": "string",
+      "maxLength": 100,
+      "x-message": "« publisher » est le nom de l'éditeur (100 caractères au plus)."
+    },
+    "year": {
+      "type": "integer",
+      "minimum": 1400,
+      "maximum": 2100,
+      "x-message": "« year » est l'année de publication de l'édition (exemple : 2015)."
+    },
+    "based_on": {
+      "description": "null, ou l'identifiant de l'édition (de la MÊME saga) dont celle-ci est une copie adaptée.",
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "x-message": "« based_on » vaut null ou l'identifiant d'une autre édition de la même saga."
+    },
+    "created_by": {
+      "description": "Noms d'utilisateur GitHub des créateurs de l'édition (jamais d'e-mail).",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "common.schema.json#/$defs/githubUser" },
+      "x-message": "« created_by » liste au moins un nom d'utilisateur GitHub (jamais d'adresse e-mail)."
+    },
+    "translators": {
+      "description": "Traducteurs de l'édition (simples noms, optionnel).",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "$ref": "common.schema.json#/$defs/text", "maxLength": 100 },
+      "x-message": "« translators » est une liste de noms (texte simple)."
+    },
+    "books": {
+      "description": "Tomes de l'édition, dans l'ordre de lecture.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "chapters"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/id" },
+          "title": {
+            "$ref": "common.schema.json#/$defs/text",
+            "type": "string",
+            "maxLength": 150,
+            "x-message": "« title » est le titre du tome (150 caractères au plus)."
+          },
+          "chapters": {
+            "description": "Nombre de chapitres du tome dans CETTE édition.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "x-message": "« chapters » est le nombre de chapitres du tome, un entier à partir de 1."
+          }
+        }
+      },
+      "x-message": "« books » liste au moins un tome, chacun avec « id », « title » et « chapters »."
+    }
+  }
+}

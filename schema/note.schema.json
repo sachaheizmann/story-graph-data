@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "note.schema.json",
+  "title": "Note, partie neutre (notes/<note-id>.json)",
+  "description": "Une note complète un personnage ou un lien avec une information apprise à une position précise. RÈGLE « révélé ≠ vrai » : « start » est le moment où le lecteur apprend ce que dit la note.",
+  "type": "object",
+  "required": ["id", "about", "start"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/noteId" },
+    "about": {
+      "description": "Le sujet de la note : un personnage ou un lien de la même édition.",
+      "type": "object",
+      "required": ["type", "id"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": ["character", "relation"],
+          "x-message": "« about.type » vaut « character » ou « relation »."
+        },
+        "id": { "$ref": "common.schema.json#/$defs/id" }
+      },
+      "x-message": "« about » désigne le sujet de la note : { \"type\": \"character\" ou \"relation\", \"id\": \"…\" }."
+    },
+    "start": { "$ref": "position.schema.json" }
+  }
+}

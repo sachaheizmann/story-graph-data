@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "relation.schema.json",
+  "title": "Lien entre deux personnages (un élément de relations.json)",
+  "description": "RÈGLE « révélé ≠ vrai » : « start » est le moment où le lecteur APPREND le lien (même s'il existait depuis longtemps dans l'histoire) ; « end » le moment où il apprend que le lien a pris fin.",
+  "type": "object",
+  "required": ["id", "from", "to", "type", "start"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "from": {
+      "description": "Personnage d'origine. Pour un type orienté, c'est celui qui « agit » (le parent, le mentor, le maître).",
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "to": {
+      "description": "Personnage visé.",
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "type": {
+      "description": "Type de lien, défini dans data/_common/relation-types.json.",
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "start": { "$ref": "position.schema.json" },
+    "end": { "$ref": "position.schema.json#/$defs/orNull" }
+  }
+}

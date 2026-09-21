@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "relations.schema.json",
+  "title": "Liens d'une édition (relations.json)",
+  "type": "array",
+  "items": { "$ref": "relation.schema.json" }
+}

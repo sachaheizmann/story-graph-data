@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "character.schema.json",
+  "title": "Personnage, partie neutre (characters/<id>.json)",
+  "description": "RÈGLE « révélé ≠ vrai » : « start » est le moment où le lecteur DÉCOUVRE le personnage ; « end » le moment où il apprend sa mort ou son départ définitif.",
+  "type": "object",
+  "required": ["id", "start"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "start": { "$ref": "position.schema.json" },
+    "end": { "$ref": "position.schema.json#/$defs/orNull" }
+  }
+}

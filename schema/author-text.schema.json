@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "author-text.schema.json",
+  "title": "Texte d'un auteur (data/authors/text/<langue>/<id>.json)",
+  "type": "object",
+  "required": ["name", "bio"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "$ref": "common.schema.json#/$defs/text",
+      "type": "string",
+      "maxLength": 100,
+      "x-message": "« name » est le nom de l'auteur (100 caractères au plus)."
+    },
+    "bio": {
+      "description": "Biographie courte, écrite avec vos propres mots.",
+      "$ref": "common.schema.json#/$defs/text",
+      "type": "string",
+      "maxLength": 600,
+      "x-message": "« bio » est une biographie courte (600 caractères au plus), écrite avec vos propres mots."
+    }
+  }
+}
