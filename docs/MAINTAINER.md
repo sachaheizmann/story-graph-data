@@ -13,8 +13,10 @@ Il y a donc deux couches :
 
 | Couche | Ce qu'elle fait | Peut-elle être contournée par une PR ? |
 |---|---|---|
-| **Require review from Code Owners** + `CODEOWNERS` | Sans votre accord, impossible de fusionner une PR qui touche `schema/`, `scripts/`, `.github/`, `docs/` ou les fichiers de la racine | **Non** |
+| **Require review from Code Owners** (dans le ruleset `protect-main`) + `CODEOWNERS` | Sans votre accord, impossible de fusionner une PR qui touche `schema/`, `scripts/`, `.github/`, `docs/` ou les fichiers de la racine | **Non** |
 | Contrôle de périmètre (`check-scope.mjs`) | Fait échouer tout de suite la PR d'une personne extérieure qui sort de `data/`, avec un message qui explique | Oui, en principe (c'est une aide) |
+
+Ces protections sont regroupées dans un **ruleset** GitHub nommé `protect-main` (voir la section 1), et non dans la protection de branche « classique ».
 
 ## Liste de mise en route (à faire une seule fois)
 
@@ -26,11 +28,11 @@ Il y a donc deux couches :
 
 > **Ordre important : réglez la protection de `main` APRÈS le premier lancement de `validate`, pas avant.**
 > L'envoi initial du code sur `main` lance tout seul le workflow `validate`, une fois par version de Node : il produit **deux** contrôles, nommés **`validate (Node 24)`** et **`validate (Node 22)`**. Attendez qu'ils aient fini (onglet [Actions](https://github.com/sachaheizmann/story-graph-data/actions), coches vertes). GitHub ne les propose dans la liste des contrôles à rendre obligatoires qu'**après** leur premier lancement : si vous réglez la protection avant, la recherche ne trouvera rien.
-> Toute la règle de protection (Code Owners compris) se crée alors **en une seule fois**, sections 1 et 2 ci-dessous.
+> Tout le ruleset (Code Owners compris) se crée alors **en une seule fois**, sections 1 et 2 ci-dessous.
 
 1. [ ] Réglage n° 1 : **Require review from Code Owners** (OBLIGATOIRE) → [section 1](#1-réglage-obligatoire--require-review-from-code-owners)
-2. [ ] Protection complète de `main`, avec les **deux** contrôles `validate` obligatoires → [section 2](#2-le-reste-de-la-protection-de-main)
-3. [ ] Réglages des Actions (dont **Require approval for all outside collaborators**) → [section 3](#3-réglages-des-actions)
+2. [ ] Le reste du ruleset `protect-main`, avec les **deux** contrôles `validate` obligatoires → [section 2](#2-le-reste-du-ruleset-protect-main)
+3. [ ] Réglages des Actions (dont **Require approval for all external contributors**) → [section 3](#3-réglages-des-actions)
 4. [ ] Secret `DEPLOY_HOOK_URL` → [section 4](#4-le-secret-deploy_hook_url)
 5. [ ] Étiquette `spoiler` → [section 5](#5-créer-létiquette-spoiler)
 6. [ ] Vérifier que tout marche → [section 6](#6-vérifier-que-tout-fonctionne)
@@ -41,50 +43,100 @@ Il y a donc deux couches :
 
 **Ne sautez pas cette étape.** Sans elle, les protections de `scripts/`, `.github/` et `schema/` n'existent pas vraiment.
 
+> **Ce projet utilise un « ruleset » nommé `protect-main`, et non la protection de branche classique.**
+> GitHub propose deux outils équivalents pour protéger une branche : l'ancienne *protection de branche* (Settings > Branches > « Branch protection rules ») et les **rulesets** (Settings > Rules > Rulesets), plus récents. Ce dépôt utilise un ruleset : si vous cherchez « Branch protection rules » dans les réglages, vous n'y trouverez rien, et c'est normal. Les options portent les mêmes noms (tableau de correspondance à la fin de la section 2).
+
 Ce que fait ce réglage : le fichier [`.github/CODEOWNERS`](../.github/CODEOWNERS) dit que vous êtes propriétaire de `schema/`, `scripts/`, `.github/`, `docs/` et des fichiers de la racine (et de `data/_common/relation-types.json`). Avec ce réglage, GitHub **refuse** de fusionner une PR qui touche ces fichiers tant que vous ne l'avez pas approuvée.
 
 **Comment faire :**
 
-1. Ouvrez [Settings > Branches](https://github.com/sachaheizmann/story-graph-data/settings/branches).
-2. Sous « Branch protection rules », cliquez **Add branch protection rule** (ou modifiez la règle existante).
-3. Dans « Branch name pattern », écrivez `main`.
-4. Cochez **Require a pull request before merging**. Des options apparaissent dessous.
-5. Cochez **Require review from Code Owners**. ← *c'est ce réglage*
-6. **Ne cliquez pas encore sur Create.** Passez à la section 2, cochez le reste de la règle, puis créez-la en une seule fois.
+1. Ouvrez [Settings > Rules > Rulesets](https://github.com/sachaheizmann/story-graph-data/settings/rules).
+2. Cliquez **New ruleset**, puis **New branch ruleset**.
+3. **Ruleset name** : `protect-main`.
+4. **Enforcement status** : la valeur par défaut est « Disabled ». Choisissez **Active** : un ruleset désactivé ne protège rien.
+5. **Target branches** : cliquez **Add a target** et choisissez la branche par défaut (`main`). *(Dans l'API, elle s'écrit `~DEFAULT_BRANCH`.)*
+6. Dans la liste des règles de branche, cochez **Require a pull request before merging**. Des options apparaissent dessous.
+7. Cochez **Require review from Code Owners**. ← *c'est ce réglage*
+8. **Ne cliquez pas encore sur Create.** Passez à la section 2, cochez le reste du ruleset, puis créez-le en une seule fois.
 
-Les autres cases de cette même règle sont dans la [section 2](#2-le-reste-de-la-protection-de-main), y compris les deux contrôles `validate` (qui n'existent dans la liste qu'après le premier lancement).
+Les autres règles de ce même ruleset sont dans la [section 2](#2-le-reste-du-ruleset-protect-main), y compris les deux contrôles `validate` (qui n'existent dans la liste qu'après le premier lancement).
 
 ### Un piège quand on est seul mainteneur
 
 GitHub **interdit d'approuver sa propre Pull Request**. Si vous ouvrez vous-même une PR qui modifie `scripts/` (donc soumise à Code Owners), personne d'autre ne peut l'approuver : elle serait bloquée.
 
-**Solution :** dans la règle de protection, laissez **décochée** la case **Do not allow bypassing the above settings**. En tant que propriétaire du dépôt, vous verrez alors, sur vos propres PR, une option « Merge without waiting for requirements to be met » (fusionner sans attendre les conditions). Cette exception ne s'applique **qu'à vous** : les autres personnes restent bloquées. Utilisez-la seulement pour vos propres PR, après avoir vu passer le contrôle `validate`.
+**Solution :** dans le ruleset, section **Bypass list**, cliquez **Add bypass**, choisissez le rôle **Repository admin** (administrateur du dépôt), puis, à droite de « Always allow », choisissez **For pull requests only**.
+
+Effet : vous pouvez fusionner **vos propres PR** (une option du genre « Merge without waiting for requirements to be met (bypass rules) » apparaît alors), mais vous ne pouvez **pas pousser directement** sur `main`. Chaque changement laisse donc une trace dans une Pull Request : c'est voulu. Ne choisissez pas « Always allow », qui autoriserait aussi les envois directs. Les autres personnes restent bloquées. Utilisez le contournement seulement pour vos propres PR, après avoir vu passer les deux contrôles `validate`.
 
 *(Si un jour vous avez une deuxième personne de confiance, ajoutez-la comme « Collaborator » et dans `CODEOWNERS` : vous pourrez alors vous approuver l'un l'autre.)*
 
 ---
 
-## 2. Le reste de la protection de `main`
+## 2. Le reste du ruleset `protect-main`
 
-**Faites cette étape APRÈS le premier lancement de `validate`** (voir « Ordre important » plus haut). Dans la **même règle** (Settings > Branches > règle sur `main`), cochez :
+**Faites cette étape APRÈS le premier lancement de `validate`** (voir « Ordre important » plus haut). Dans le **même ruleset**, cochez :
 
-| Case | Pourquoi |
+| Règle ou option du ruleset | Pourquoi |
 |---|---|
 | **Require a pull request before merging** | Personne ne modifie `main` directement : tout passe par une PR relue. |
-| **Require approvals** : `1` | Il faut au moins une approbation. Seules les approbations de personnes ayant le droit d'écriture comptent : concrètement, la vôtre. Les relectures de la communauté sont précieuses, mais c'est vous qui acceptez. |
-| **Dismiss stale pull request approvals when new commits are pushed** | Si la PR change après votre approbation, elle doit être relue. |
+| **Required approvals** : `1` | Il faut au moins une approbation. Seules les approbations de personnes ayant le droit d'écriture comptent : concrètement, la vôtre. Les relectures de la communauté sont précieuses, mais c'est vous qui acceptez. |
+| **Dismiss stale pull request approvals when new commits are pushed** | Si la PR change après votre approbation, elle doit être relue. Sans cela, on pourrait faire approuver une PR inoffensive, puis y pousser un autre changement : l'approbation resterait valable. |
 | **Require review from Code Owners** | Voir la section 1 (**obligatoire**). |
-| **Require status checks to pass before merging** | Une PR dont les contrôles échouent ne peut pas être fusionnée. |
-| ↳ dans la zone de recherche, ajoutez **les deux** contrôles : **`validate (Node 24)`** et **`validate (Node 22)`** | Ce sont les deux lignes de la matrice de [`validate.yml`](../.github/workflows/validate.yml). **Rendez-les tous les deux obligatoires** : si un seul l'est, une PR peut être fusionnée alors que le code casse sur l'autre version de Node. *Ils n'apparaissent dans la recherche qu'après avoir tourné au moins une fois.* |
 | **Require conversation resolution before merging** | Toutes les remarques de relecture doivent être traitées (« Resolve conversation »). |
-| **Do not allow bypassing the above settings** | **Laissez décochée** (voir le piège ci-dessus). |
-| **Allow force pushes** / **Allow deletions** | Laissez **décochées** (par défaut) : personne ne peut réécrire l'historique de `main` ni le supprimer. |
+| **Allowed merge methods** | Conseillé : **Squash** seulement (une contribution = un commit propre sur `main`). Facultatif. |
+| **Require status checks to pass before merging** | Une PR dont les contrôles échouent ne peut pas être fusionnée. |
+| ↳ ajoutez **les deux** contrôles : **`validate (Node 24)`** et **`validate (Node 22)`** | Ce sont les deux lignes de la matrice de [`validate.yml`](../.github/workflows/validate.yml). **Rendez-les tous les deux obligatoires** : si un seul l'est, une PR peut être fusionnée alors que le code casse sur l'autre version de Node. *Ils n'apparaissent dans la recherche qu'après avoir tourné au moins une fois.* |
+| **Restrict deletions** | Personne ne peut supprimer `main`. |
+| **Block force pushes** | Personne ne peut réécrire l'historique de `main`. |
+| **Bypass list** : **Repository admin**, **For pull requests only** | Voir le piège de la section 1 : vous pouvez fusionner vos propres PR, sans pouvoir pousser directement. |
 
-Cliquez ensuite **Create** (ou **Save changes**) en bas de la page.
+Cliquez ensuite **Create** en bas de la page.
 
 > **Si vous changez un jour les versions de Node testées** (ligne `node: [24, 22]` de `validate.yml`) : mettez à jour cette liste de contrôles obligatoires. Un contrôle qui n'existe plus reste « attendu » et bloquerait toutes les PR.
 
-Côté fusion, dans [Settings > General](https://github.com/sachaheizmann/story-graph-data/settings), section « Pull Requests », il est conseillé de ne garder que **Allow squash merging** (une contribution = un commit propre sur `main`) et de cocher **Automatically delete head branches**.
+Vous pouvez aussi restreindre les modes de fusion pour tout le dépôt, dans [Settings > General](https://github.com/sachaheizmann/story-graph-data/settings), section « Pull Requests » (ne garder que **Allow squash merging**), et cocher **Automatically delete head branches**.
+
+### Si vous connaissez la protection de branche classique
+
+| Protection de branche classique | Ruleset `protect-main` |
+|---|---|
+| Require a pull request before merging, Require approvals, Dismiss stale…, Require review from Code Owners | Les mêmes options, dans la règle **Require a pull request before merging** |
+| Require conversation resolution before merging | La même option, dans la même règle |
+| Require status checks to pass before merging | **Require status checks to pass before merging** |
+| Allow deletions (décochée) | **Restrict deletions** |
+| Allow force pushes (décochée) | **Block force pushes** |
+| Do not allow bypassing the above settings (décochée) | **Bypass list** : Repository admin, **For pull requests only** (mieux : pas d'envoi direct) |
+
+### Vérifier les réglages en ligne de commande (lecture seule)
+
+Avec l'outil `gh` (connecté à votre compte), ces commandes ne modifient rien :
+
+```bash
+gh api repos/sachaheizmann/story-graph-data/rulesets
+gh api repos/sachaheizmann/story-graph-data/rulesets/<id>
+gh api repos/sachaheizmann/story-graph-data/actions/permissions/fork-pr-contributor-approval
+gh api repos/sachaheizmann/story-graph-data/actions/permissions/workflow
+gh api repos/sachaheizmann/story-graph-data/codeowners/errors --jq '.errors | length'
+```
+
+La première donne l'`<id>` du ruleset. Voici ce que vous devez lire :
+
+| Où | Champ | Valeur attendue |
+|---|---|---|
+| ruleset | `enforcement` | `active` |
+| ruleset | `conditions.ref_name.include` | `["~DEFAULT_BRANCH"]` |
+| ruleset | `bypass_actors[].bypass_mode` | `pull_request` (= « For pull requests only ») |
+| ruleset | règles `deletion` et `non_fast_forward` | présentes |
+| règle `pull_request` | `required_approving_review_count` | `1` |
+| règle `pull_request` | `require_code_owner_review` | `true` |
+| règle `pull_request` | `dismiss_stale_reviews_on_push` | `true` |
+| règle `pull_request` | `required_review_thread_resolution` | `true` |
+| règle `required_status_checks` | contrôles | `validate (Node 24)` et `validate (Node 22)` |
+| Actions | `approval_policy` | `all_external_contributors` |
+| Actions | `default_workflow_permissions` | `read` |
+| Actions | `can_approve_pull_request_reviews` | `false` |
+| `CODEOWNERS` | nombre d'erreurs | `0` |
 
 ---
 
@@ -92,8 +144,9 @@ Côté fusion, dans [Settings > General](https://github.com/sachaheizmann/story-
 
 Ouvrez [Settings > Actions > General](https://github.com/sachaheizmann/story-graph-data/settings/actions).
 
-1. **Fork pull request workflows from outside collaborators** : choisissez **Require approval for all outside collaborators**.
+1. **Approval for running fork pull request workflows from contributors** : choisissez **Require approval for all external contributors**.
    Ainsi, quand une personne extérieure ouvre une PR, ses contrôles automatiques **ne démarrent pas** tant que vous n'avez pas cliqué sur « Approve and run workflows ». Vous pouvez regarder ce que la PR modifie avant de laisser tourner du code venu d'inconnus.
+   Les deux autres choix (« Require approval for first-time contributors who are new to GitHub » et « Require approval for first-time contributors ») ne demandent l'approbation qu'aux **nouveaux** contributeurs. GitHub prévient lui-même qu'une personne malveillante peut remplir cette condition en se faisant accepter une correction anodine (une faute de frappe, par exemple) : ses PR suivantes se lancent ensuite sans votre clic. Avec « all external contributors », toute personne extérieure a besoin de votre accord, **à chaque fois**.
 2. **Workflow permissions** : choisissez **Read repository contents and packages permissions** (lecture seule).
 3. Laissez **décochée** la case **Allow GitHub Actions to create and approve pull requests**.
 4. Cliquez **Save**.
@@ -146,9 +199,9 @@ Trois petites Pull Requests de test, une fois les réglages faits. Vous pouvez l
 
 | Test | Ce qu'il faut voir |
 |---|---|
-| **A. PR d'un compte extérieur qui modifie `scripts/`** (utilisez un deuxième compte GitHub, ou demandez à une connaissance) | Les contrôles attendent votre clic « Approve and run workflows ». Une fois lancés, `validate` échoue à l'étape « Contrôle de périmètre » avec un message en français. |
-| **B. PR de votre compte qui modifie `scripts/` ou `.github/`** | GitHub affiche « Review required » avec vous comme *Code Owner*. Sans le réglage n° 1, ce message n'apparaîtrait pas. |
-| **C. PR qui ne modifie qu'un fichier de `data/`** | Les **deux** contrôles `validate (Node 24)` et `validate (Node 22)` passent au vert, et il faut votre approbation pour fusionner. |
+| **A. PR d'un compte extérieur qui modifie `scripts/`** (utilisez un deuxième compte GitHub, ou demandez à une connaissance) | Les contrôles attendent votre clic « Approve and run workflows ». Une fois lancés, `validate (Node 24)` et `validate (Node 22)` échouent à l'étape « Contrôle de périmètre », avec un message en français qui commence par « Cette Pull Request modifie des fichiers en dehors de data/ » ; les étapes suivantes (installation, tests) sont ignorées. |
+| **B. PR de votre compte qui modifie `scripts/` ou `.github/`** | Les deux contrôles passent au vert (le contrôle de périmètre reconnaît l'auteur `OWNER`), mais GitHub affiche « Review required » : vous êtes le *Code Owner* et vous ne pouvez pas approuver votre propre PR. Vous fusionnez grâce au contournement « For pull requests only ». Sans le réglage n° 1, cette exigence n'apparaîtrait pas. |
+| **C. PR qui ne modifie qu'un fichier de `data/`** | Les **deux** contrôles `validate (Node 24)` et `validate (Node 22)` passent au vert (le contrôle de périmètre affiche « tous dans data/ »), et il faut votre approbation pour fusionner. GitHub ne réclame **pas** de relecture de propriétaire : `data/` n'a pas de propriétaire. |
 
 Si le test B n'affiche pas d'exigence de relecture par un propriétaire, revenez à la [section 1](#1-réglage-obligatoire--require-review-from-code-owners) : le réglage n'est pas actif. Vous pouvez aussi ouvrir le fichier [`CODEOWNERS`](https://github.com/sachaheizmann/story-graph-data/blob/main/.github/CODEOWNERS) sur GitHub : il signale les erreurs de syntaxe en haut de page.
 
@@ -219,7 +272,7 @@ Le fichier [`.github/dependabot.yml`](../.github/dependabot.yml) demande à **De
 
 **Précisions utiles :**
 
-- Le réglage « Require approval for all outside collaborators » ne concerne pas Dependabot : sa branche est dans ce dépôt, pas dans une copie extérieure. Ses contrôles tournent avec un jeton en lecture seule et sans accès à vos secrets.
+- Le réglage « Require approval for all external contributors » ne concerne pas Dependabot : sa branche est dans ce dépôt, pas dans une copie extérieure. Ses contrôles tournent avec un jeton en lecture seule et sans accès à vos secrets.
 - Dependabot crée lui-même ses étiquettes (par exemple `dependencies`).
 - Pour ne plus recevoir ces PR, supprimez `.github/dependabot.yml` (par une PR).
 
