@@ -1,0 +1,2 @@
+# Force les fins de ligne LF partout (le contrôle de format l'exige).
+* text=auto eol=lf
