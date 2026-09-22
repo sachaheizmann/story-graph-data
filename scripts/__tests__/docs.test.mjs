@@ -30,10 +30,11 @@ test('README : la règle « révélé ≠ vrai » est en gras, avec l\'exemple d
   assert.match(readme, /\*\*Conséquence : la description d'un personnage ne contient que ce qui est connu à son `start`\.\*\*/);
 });
 
-test('README : un emplacement balisé pour l\'adresse du site, qui n\'existe pas encore', () => {
-  const markers = readme.match(/^<!-- TODO: URL du site -->$/gm) ?? [];
-  assert.equal(markers.length, 1, 'le repère « <!-- TODO: URL du site --> » est présent une fois, sur sa propre ligne');
+
+test('README : l\'adresse du site est présente, sans repère TODO restant', () => {
   assert.match(readme, /^## Le site$/m);
+  assert.doesNotMatch(readme, /<!-- TODO: URL du site -->/, 'le repère TODO doit être remplacé par le vrai lien');
+  assert.match(readme, /https:\/\/[^\s]+\.netlify\.app/, 'une adresse Netlify doit être présente');
 });
 
 test('README : présente les deux dépôts, l\'arborescence, la démo, et les deux licences', () => {
