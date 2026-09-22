@@ -8,9 +8,9 @@ Chaque contribution passe par une Pull Request, relue par la communauté puis ac
 
 ## Le site
 
-Le site qui affiche ces arbres n'est pas encore en ligne.
+Le site qui affiche ces arbres est en ligne ici :
 
-<!-- TODO: URL du site -->
+https://meek-sprite-6dfcc0.netlify.app/
 
 ## La règle qui gouverne tout : « révélé ≠ vrai »
 
